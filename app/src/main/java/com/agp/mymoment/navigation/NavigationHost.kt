@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.agp.mymoment.ui.login.LoginScreen
+import com.agp.mymoment.ui.login.RegisterScreen
 
 @Composable
 fun NavigationHost(navController: NavHostController, startDestination: String){
@@ -13,8 +13,8 @@ fun NavigationHost(navController: NavHostController, startDestination: String){
         composable(Destinations.generico.ruta){
             //screen(navController)
         }
-        composable(Destinations.LoginScreen.ruta){
-            LoginScreen(navController)
+        composable(Destinations.RegisterScreen.ruta){
+            RegisterScreen(navController)
         }
     }
 }

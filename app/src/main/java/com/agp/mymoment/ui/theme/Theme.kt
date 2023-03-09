@@ -1,23 +1,22 @@
 package com.agp.mymoment.ui.theme
 
-import android.hardware.lights.Light
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
-import com.agp.mymoment.R
+import androidx.compose.ui.res.fontResource
 
 private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = primaryVariant,
-    secondary = Teal200
+    primary = primaryDark,
+    primaryVariant = primaryVariantDark,
+    secondary = White
 )
 
 private val LightColorPalette = lightColors(
-    primary = primary,
-    primaryVariant = primaryVariant,
-    secondary = Teal200
+    primary = primaryLight,
+    primaryVariant = primaryVariantLight,
+    secondary = Black
 
     /* Other default colors to override
     background = Color.White,

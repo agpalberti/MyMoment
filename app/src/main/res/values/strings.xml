@@ -9,5 +9,18 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
-    <string name="login_usuario">Usuario</string>
+
+
+    <string name="registro">Regístrate en myMoment</string>
+    <string name="eslogan">Comparte tus mejores momentos con tus amigos</string>
+    <string name="correo">Correo electrónico</string>
+    <string name="nombre_completo">Nombre completo</string>
+    <string name="nombre_usuario">Nombre de usuario</string>
+    <string name="password">Contraseña</string>
+    <string name="show_password">Mostrar contraseña</string>
+    <string name="hide_password">Ocultar contraseña</string>
+    <string name="next">Siguiente</string>
+    <string name="login_now">¿Ya tienes una cuenta? Inicia sesión</string>
+    <string name="login">Inicia sesión en myMoment</string>
+    <string name="register_now">¿No tienes una cuenta? Regístrate ahora</string>
 </resources>
