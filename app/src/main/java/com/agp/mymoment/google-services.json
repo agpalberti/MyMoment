@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "126607815978",
+    "project_id": "mymoment-8f056",
+    "storage_bucket": "mymoment-8f056.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:126607815978:android:6683938be5879f33d69a53",
+        "android_client_info": {
+          "package_name": "com.agp.mymoment"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "126607815978-pkg57goq9tsai0p8i6cifr2d7epem6ts.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdPnHOQOfNisZe0CouaFSaeL5sipQqP-4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "126607815978-pkg57goq9tsai0p8i6cifr2d7epem6ts.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

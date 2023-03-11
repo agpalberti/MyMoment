@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyMomentTheme(darkTheme = true) {
+            MyMomentTheme() {
                 SystemBarColor(color = MaterialTheme.colors.background)
                 // A surface container using the 'background' color from the theme
                 Surface(
