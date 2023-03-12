@@ -18,21 +18,36 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.agp.mymoment.R
+import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.theme.getLogoId
+
+
+@Composable
+fun RegisterScreen(navController: NavHostController){
+    RegisterScreenBody(navController)
+}
 
 @Composable
 @Preview
-fun RegisterScreen(
+fun RegisterScreenBody(
     navController: NavHostController? = null,
     viewModel: RegisterScreenViewModel = hiltViewModel()
 ) {
 
     @Composable
+    fun ErrorTooltip(){
+        Text(text = viewModel.getErrorString(), color = MaterialTheme.colors.error, style = MaterialTheme.typography.body1, fontSize = 12.sp)
+    }
+
+    @Composable
     fun TextSwitchButton(text: String) {
-        TextButton(onClick = { viewModel.isOnRegister = !viewModel.isOnRegister }) {
+        TextButton(onClick = {
+            viewModel.resetErrors()
+            viewModel.isOnRegister = !viewModel.isOnRegister }) {
             Text(
                 text = text,
                 textAlign = TextAlign.Center,
@@ -57,6 +72,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = viewModel.password,
             onValueChange = { viewModel.password = it },
+            isError = viewModel.passwordError.isNotEmpty(),
             singleLine = true,
             placeholder = { Text(stringResource(id = R.string.password)) },
             visualTransformation = if (viewModel.passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -70,7 +86,6 @@ fun RegisterScreen(
                     if (viewModel.passwordVisible) stringResource(id = R.string.hide_password) else stringResource(
                         id = R.string.show_password
                     )
-
                 IconButton(onClick = { viewModel.passwordVisible = !viewModel.passwordVisible }) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = image),
@@ -87,8 +102,9 @@ fun RegisterScreen(
         ThemedTextField(
             value = viewModel.email,
             onValueChange = { viewModel.email = it },
-            placeholder = stringResource(id = R.string.correo),
-            keyBoardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            labelText = stringResource(id = R.string.correo),
+            keyBoardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            isError = viewModel.emailError.isNotEmpty()
         )
     }
 
@@ -166,8 +182,9 @@ fun RegisterScreen(
                     ThemedTextField(
                         value = viewModel.name,
                         onValueChange = { viewModel.name = it },
-                        placeholder = stringResource(id = R.string.nombre_completo),
-                        keyBoardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                        labelText = stringResource(id = R.string.nombre_completo),
+                        keyBoardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                        isError = viewModel.nameError.isNotEmpty()
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -175,13 +192,16 @@ fun RegisterScreen(
                     ThemedTextField(
                         value = viewModel.nickname,
                         onValueChange = { viewModel.nickname = it },
-                        placeholder = stringResource(id = R.string.nombre_usuario),
-                        keyBoardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                        labelText = stringResource(id = R.string.nombre_usuario),
+                        keyBoardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                        isError = viewModel.nicknameError.isNotEmpty()
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
 
                     PasswordTextField()
+
+                    ErrorTooltip()
 
                     Spacer(modifier = Modifier.height(6.dp))
 
@@ -189,8 +209,14 @@ fun RegisterScreen(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    NextButton { viewModel.register() }
-
+                    NextButton {
+                        viewModel.resetErrors()
+                        viewModel.register {registered ->
+                            if (registered) viewModel.login { logged ->
+                                if (logged) navController?.navigate(Destinations.StartScreen.ruta)
+                            }
+                        }
+                    }
                 }
             }
             //endregion
@@ -217,13 +243,20 @@ fun RegisterScreen(
 
                     PasswordTextField()
 
+                    ErrorTooltip()
+
                     Spacer(modifier = Modifier.height(6.dp))
 
                     TextSwitchButton(stringResource(id = R.string.register_now))
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    NextButton { viewModel.login() }
+                    NextButton {
+                        viewModel.resetErrors()
+                        viewModel.login { logged ->
+                            if (logged) navController?.navigate(Destinations.StartScreen.ruta)
+                        }
+                    }
 
                 }
             }
@@ -238,15 +271,17 @@ fun RegisterScreen(
 fun ThemedTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: String,
+    labelText: String,
     keyBoardOptions: KeyboardOptions,
+    isError:Boolean = false
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         singleLine = true,
-        placeholder = { Text(text = placeholder) },
+        placeholder = { Text(text = labelText) },
         keyboardOptions = keyBoardOptions,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        isError = isError
     )
 }

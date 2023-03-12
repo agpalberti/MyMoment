@@ -1,5 +1,6 @@
 package com.agp.mymoment
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,6 +10,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.agp.mymoment.model.DBM
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.navigation.NavigationHost
 import com.agp.mymoment.ui.theme.MyMomentTheme
@@ -27,6 +29,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
+                    DBM.context = this.resources
                     Start()
                 }
             }

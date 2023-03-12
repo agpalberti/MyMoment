@@ -1,16 +1,6 @@
 <resources>
     <string name="app_name">MyMoment</string>
     <string name="title_activity_login">LoginActivity</string>
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
-
-
     <string name="registro">Regístrate en myMoment</string>
     <string name="eslogan">Comparte tus mejores momentos con tus amigos</string>
     <string name="correo">Correo electrónico</string>
@@ -23,4 +13,13 @@
     <string name="login_now">¿Ya tienes una cuenta? Inicia sesión</string>
     <string name="login">Inicia sesión en myMoment</string>
     <string name="register_now">¿No tienes una cuenta? Regístrate ahora</string>
+    <string name="emailInUseError">Correo electrónico en uso</string>
+    <string name="passwordTooShortError">La contraseña es demasiado corta</string>
+    <string name="emptyEmailError">El correo electrónico no puede estar vacío</string>
+    <string name="emptyPasswordError">La contraseña no puede estar vacía</string>
+    <string name="emptyNameError">El nombre no puede estar vacío</string>
+    <string name="emptyNicknameError">El nombre de usuario no puede estar vacío</string>
+    <string name="invalidPasswordError">Contraseña incorrecta</string>
+    <string name="invalidUserError">No existe una cuenta con este correo electrónico</string>
+    <string name="invalidEmailFormatError">El formato del correo electrónico no es correcto</string>
 </resources>
