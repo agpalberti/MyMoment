@@ -1,6 +1,7 @@
 package com.agp.mymoment.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import com.google.firebase.annotations.concurrent.Background
 
 val White = Color(0xFFF0F0F0)
 val primaryDark = Color(0xff07f989)

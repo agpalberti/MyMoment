@@ -213,7 +213,7 @@ fun RegisterScreenBody(
                         viewModel.resetErrors()
                         viewModel.register {registered ->
                             if (registered) viewModel.login { logged ->
-                                if (logged) navController?.navigate(Destinations.StartScreen.ruta)
+                                if (logged) navController?.navigate(Destinations.HomeScreen.ruta)
                             }
                         }
                     }
@@ -254,7 +254,7 @@ fun RegisterScreenBody(
                     NextButton {
                         viewModel.resetErrors()
                         viewModel.login { logged ->
-                            if (logged) navController?.navigate(Destinations.StartScreen.ruta)
+                            if (logged) navController?.navigate(Destinations.HomeScreen.ruta)
                         }
                     }
 

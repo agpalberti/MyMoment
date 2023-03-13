@@ -8,12 +8,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class DBM {
 
-
-
     companion object {
 
         var context: Resources? = null
         fun onLogin(email: String, password: String, callback: (Int) -> Unit) {
+            //todo gestionar bloqueo cuenta
             try {
                 if (email.isNotBlank() && password.isNotEmpty()) {
                     FirebaseAuth.getInstance()
@@ -39,7 +38,6 @@ class DBM {
                         .addOnSuccessListener {
                             Log.i("Login", "Logeado correctamente")
                             callback(0)
-                            //TODO OBTENER DATOS
                         }
                 } else {
                     if (email.isBlank()) {
@@ -56,9 +54,6 @@ class DBM {
                 callback(-2) // Error genérico no gestionado
             }
         }
-
-
-
         fun onRegister(
             email: String,
             password: String,
