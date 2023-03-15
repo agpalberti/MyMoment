@@ -9,8 +9,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 class DBM {
 
     companion object {
-
-        var context: Resources? = null
         fun onLogin(email: String, password: String, callback: (Int) -> Unit) {
             //todo gestionar bloqueo cuenta
             try {
@@ -142,6 +140,10 @@ class DBM {
                 Log.e("Register", "-2: Error no gestionado", error)
                 callback(-2)
             }
+        }
+
+        fun onLogOut() {
+            FirebaseAuth.getInstance().signOut()
         }
 
     }

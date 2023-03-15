@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import com.agp.mymoment.R
+import com.agp.mymoment.config.MyPreferences
 import com.agp.mymoment.model.DBM
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.*
@@ -81,31 +82,31 @@ class RegisterScreenViewModel @Inject constructor(savedStateHandle: SavedStateHa
     private fun parseErrorCode(errorCode: Int?) {
         when (errorCode) {
             1 -> {
-                emailError = DBM.context?.getString(R.string.emailInUseError)!!
+                emailError = MyPreferences.resources?.getString(R.string.emailInUseError)!!
             }//Email en uso
             2 -> {
-                passwordError = DBM.context?.getString(R.string.passwordTooShortError)!!
+                passwordError = MyPreferences.resources?.getString(R.string.passwordTooShortError)!!
             }//La contraseña debe contener 6 carácteres de largo como mínimo
             3 -> {
-                emailError = DBM.context?.getString(R.string.emptyEmailError)!!
+                emailError = MyPreferences.resources?.getString(R.string.emptyEmailError)!!
             }//Email vacío
             4 -> {
-                passwordError = DBM.context?.getString(R.string.emptyPasswordError)!!
+                passwordError = MyPreferences.resources?.getString(R.string.emptyPasswordError)!!
             }//Contraseña vacía
             5 -> {
-                nameError = DBM.context?.getString(R.string.emptyNameError)!!
+                nameError = MyPreferences.resources?.getString(R.string.emptyNameError)!!
             }//El nombre no puede estar vacío
             6 -> {
-                nicknameError = DBM.context?.getString(R.string.emptyNicknameError)!!
+                nicknameError = MyPreferences.resources?.getString(R.string.emptyNicknameError)!!
             }//El nombre de usuario no puede estar vacío
             7 -> {
-                passwordError = DBM.context?.getString(R.string.invalidPasswordError)!!
+                passwordError = MyPreferences.resources?.getString(R.string.invalidPasswordError)!!
             }//Contraseña incorrecta
             8 -> {
-                emailError = DBM.context?.getString(R.string.invalidUserError)!!
+                emailError = MyPreferences.resources?.getString(R.string.invalidUserError)!!
             }//Usuario inexistente
             9 -> {
-                emailError = DBM.context?.getString(R.string.invalidEmailFormatError)!!
+                emailError = MyPreferences.resources?.getString(R.string.invalidEmailFormatError)!!
             }
             else -> {}
         }

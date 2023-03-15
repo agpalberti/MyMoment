@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.agp.mymoment.navigation.ThemedNavBar
+import com.agp.mymoment.ui.composables.ThemedNavBar
 
 @Composable
 fun SearchScreen(navController: NavHostController){
@@ -23,7 +23,7 @@ fun SearchScreenBody(
     navController: NavHostController? = null,
     viewModel: SearchScreenViewModel = hiltViewModel()
 ) {
-    ThemedNavBar(navController = navController!!, "search") {
+    ThemedNavBar(navController = navController!!, topBarContent = {}) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "Buscar")
 

@@ -1,18 +1,16 @@
-package com.agp.mymoment.navigation
+package com.agp.mymoment.ui.composables
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.agp.mymoment.R
+import com.agp.mymoment.navigation.Destinations
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
@@ -23,14 +21,12 @@ fun BottomNavigationBar(navController: NavController) {
         Destinations.NotificationScreen,
         Destinations.ProfileScreen
     )
-    BottomNavigation(
-        backgroundColor = MaterialTheme.colors.background
-        //todo arreglar color
-    ) {
+
+    BottomAppBar(backgroundColor = MaterialTheme.colors.background, elevation = 0.dp) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         items.forEach { item ->
-            BottomNavigationItem(
+            NoRippleBottomNavigationItem(
                 icon = {
                     Icon(
                         painterResource(id = item.icon ?: R.drawable.error),
@@ -41,7 +37,7 @@ fun BottomNavigationBar(navController: NavController) {
                 selectedContentColor = MaterialTheme.colors.primary,
                 unselectedContentColor = MaterialTheme.colors.secondary,
                 selected = currentRoute == item.ruta,
-                onClick = {
+                onClick =  {
                     navController.navigate(item.ruta) {
 
                         navController.graph.startDestinationRoute?.let { screen_route ->
@@ -55,21 +51,5 @@ fun BottomNavigationBar(navController: NavController) {
                 }
             )
         }
-    }
-}
-
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@Composable
-fun ThemedNavBar(navController: NavController, text:String, content: @Composable (() -> Unit)){
-    Scaffold(
-        topBar = {
-                 TopNavigationBar(text = text)
-        },
-        bottomBar = { BottomNavigationBar(navController = navController) },
-        backgroundColor = MaterialTheme.colors.background
-    ) {
-
-
-        content.invoke()
     }
 }

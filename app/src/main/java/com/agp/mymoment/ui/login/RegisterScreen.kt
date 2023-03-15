@@ -2,6 +2,7 @@ package com.agp.mymoment.ui.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -23,6 +24,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.agp.mymoment.R
 import com.agp.mymoment.navigation.Destinations
+import com.agp.mymoment.ui.composables.NoRippleTextButton
+import com.agp.mymoment.ui.composables.ThemedTextField
 import com.agp.mymoment.ui.theme.getLogoId
 
 
@@ -45,7 +48,8 @@ fun RegisterScreenBody(
 
     @Composable
     fun TextSwitchButton(text: String) {
-        TextButton(onClick = {
+
+        NoRippleTextButton(onClick = {
             viewModel.resetErrors()
             viewModel.isOnRegister = !viewModel.isOnRegister }) {
             Text(
@@ -213,7 +217,11 @@ fun RegisterScreenBody(
                         viewModel.resetErrors()
                         viewModel.register {registered ->
                             if (registered) viewModel.login { logged ->
-                                if (logged) navController?.navigate(Destinations.HomeScreen.ruta)
+                                if (logged) {
+                                    navController?.navigate(Destinations.HomeScreen.ruta){
+                                        navController.popBackStack()
+                                    }
+                                }
                             }
                         }
                     }
@@ -254,7 +262,11 @@ fun RegisterScreenBody(
                     NextButton {
                         viewModel.resetErrors()
                         viewModel.login { logged ->
-                            if (logged) navController?.navigate(Destinations.HomeScreen.ruta)
+                            if (logged) {
+                                navController?.navigate(Destinations.HomeScreen.ruta){
+                                    navController.popBackStack()
+                                }
+                            }
                         }
                     }
 
@@ -267,21 +279,3 @@ fun RegisterScreenBody(
 
 }
 
-@Composable
-fun ThemedTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    labelText: String,
-    keyBoardOptions: KeyboardOptions,
-    isError:Boolean = false
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        singleLine = true,
-        placeholder = { Text(text = labelText) },
-        keyboardOptions = keyBoardOptions,
-        modifier = Modifier.fillMaxWidth(),
-        isError = isError
-    )
-}

@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.agp.mymoment.navigation.ThemedNavBar
+import com.agp.mymoment.ui.composables.ThemedNavBar
 
 @Composable
 fun UploadScreen(navController: NavHostController){
@@ -24,7 +24,7 @@ fun UploadScreenBody(
     viewModel: UploadScreenViewModel = hiltViewModel()
 ) {
 
-    ThemedNavBar(navController = navController!!, "upload") {
+    ThemedNavBar(navController = navController!!, topBarContent = {}) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "Subir")
         }
