@@ -32,7 +32,6 @@ fun HomeScreenBody(
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "Home")
 
-
         }
     }
 }

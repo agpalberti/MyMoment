@@ -28,4 +28,9 @@
     <string name="light_theme">Tema claro</string>
     <string name="dark_theme">Tema oscuro</string>
     <string name="theme">Tema</string>
+    <string name="default_desc">Bienvenido a mi perfil</string>
+    <string name="edit_profile">Editar perfil</string>
+    <string name="save_changes">Guardar</string>
+    <string name="cancel_changes">Cancelar</string>
+    <string name="follow">Seguir</string>
 </resources>

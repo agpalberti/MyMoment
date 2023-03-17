@@ -1,10 +1,19 @@
 package com.agp.mymoment.model
 
-import android.content.Context
-import android.content.res.Resources
 import android.util.Log
+import com.agp.mymoment.config.MyPreferences
+import com.agp.mymoment.model.classes.User
 import com.google.firebase.auth.*
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
+import java.io.File
 
 class DBM {
 
@@ -88,10 +97,7 @@ class DBM {
                                 Log.i("Register", "Usuario creado correctamente")
                                 val user = mAuth.currentUser
                                 val db = FirebaseFirestore.getInstance()
-                                val userMap = hashMapOf(
-                                    "nickname" to nickname,
-                                    "name" to name
-                                )
+                                val userMap = User(name, nickname, MyPreferences.resources?.getString(com.agp.mymoment.R.string.default_desc)?:"")
                                 db.collection("users")
                                     .document(user?.uid!!)
                                     .set(userMap)
@@ -146,5 +152,83 @@ class DBM {
             FirebaseAuth.getInstance().signOut()
         }
 
+        fun uploadNewPfp(pfp: File){
+            val db = Firebase.storage.reference.child("users")
+            if (Firebase.auth.uid != null) {
+                db.child("${Firebase.auth.uid}/pfp.png").putBytes(pfp.readBytes())
+                    .addOnSuccessListener {
+                    }
+                    .addOnFailureListener{ e->
+                        Log.e("User","Error al subir la foto de perfil",e)
+                    }
+
+            } else Log.e("User", "Error en la sesión")
+        }
+
+        fun uploadNewBanner(banner: File){
+            val db = Firebase.storage.reference.child("users")
+            if (Firebase.auth.uid != null) {
+                db.child("${Firebase.auth.uid}/banner.png").putBytes(banner.readBytes())
+                    .addOnSuccessListener {
+                    }
+                    .addOnFailureListener{ e->
+                        Log.e("User","Error al subir el banner",e)
+                    }
+
+            } else Log.e("User", "Error en la sesión")
+        }
+
+        suspend fun getPFP(uid:String):String = suspendCoroutine{ c ->
+            val pfp = Firebase.storage.reference.child("users/${uid}/pfp.png")
+            if (Firebase.auth.uid != null) {
+
+                pfp.downloadUrl
+                    .addOnSuccessListener {url->
+                        c.resume(url.toString())
+                    }
+                    .addOnFailureListener{e ->
+                        Log.w("User", "No hay PFP", e)
+                        c.resume("https://www.pngitem.com/pimgs/m/22-223968_default-profile-picture-circle-hd-png-download.png")
+                    }
+
+            } else Log.e("User", "Error en la sesión")
+        }
+
+        suspend fun getBanner(uid:String):String = suspendCoroutine{ c ->
+            val banner = Firebase.storage.reference.child("users/${uid}/banner.png")
+            if (Firebase.auth.uid != null) {
+
+                banner.downloadUrl
+                    .addOnSuccessListener {url->
+                        c.resume(url.toString())
+                    }
+                    .addOnFailureListener{e ->
+                        Log.w("User", "No hay banner", e)
+                        c.resume("https://wallpaperstock.net/wallpapers/thumbs1/51439hd.jpg")
+                    }
+
+            } else Log.e("User", "Error en la sesión")
+        }
+
+        fun getUserData(): Flow<User> = callbackFlow {
+            val db = FirebaseFirestore.getInstance()
+            val userId = FirebaseAuth.getInstance().currentUser?.uid
+            var user = User()
+            db.collection("users").document(userId!!).get().addOnSuccessListener {
+                Log.i("User","Obtenido información")
+                val data = it.toObject(User::class.java)
+                if (data !=null) user = data
+                trySend(user)
+            }
+            awaitClose{channel.close()}
+        }
+
+        fun getLoggedUserUid(): String {
+            try {
+               return FirebaseAuth.getInstance().currentUser!!.uid
+            } catch (e:java.lang.NullPointerException){
+                throw Exception("Se ha intentado recuperar el uid cuando no hay sesión")
+            }
+        }
     }
 }

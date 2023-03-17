@@ -1,5 +1,13 @@
 package com.agp.mymoment.ui.profile
 
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -13,18 +21,20 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.agp.mymoment.R
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.composables.*
@@ -35,78 +45,64 @@ fun ProfileScreen(
     viewModel: ProfileScreenViewModel = hiltViewModel()
 ) {
 
-    @Composable
-    fun DropdownThemeItem(text: String, iconId: Int, onClick: () -> Unit) {
-        DropdownMenuItem(onClick = onClick) {
-            Icon(
-                painterResource(id = iconId),
-                contentDescription = text,
-                modifier = Modifier.size(25.dp)
-            )
-
-            Spacer(modifier = Modifier.size(10.dp))
-
-            Text(
-                text = text,
-                style = MaterialTheme.typography.subtitle1,
-                color = MaterialTheme.colors.primary
-            )
-        }
-    }
-
+    viewModel.updateUserData(viewModel.getActualUserUid())
 
     Box() {
 
         ThemedNavBar(navController = navController, topBarContent = {
             Row(Modifier.fillMaxWidth(0.5f), Arrangement.Start) {
                 Text(
-                    "klayssu",
+                    viewModel.userData.nickname ?: "",
                     style = MaterialTheme.typography.subtitle1,
                     color = MaterialTheme.colors.primary
                 )
             }
             Row(Modifier.fillMaxWidth(), Arrangement.End) {
-                NoRippleIconButton(
-                    painterResource(id = R.drawable.menu_open),
-                    contentDescription = stringResource(id = R.string.open_menu),
-                    modifier = Modifier.size(30.dp)
-                ) {
-                    //onClick
-                    viewModel.turnSidebarMenu()
+                if (viewModel.getActualUserUid() == viewModel.getActualUserUid()) {
+                    NoRippleIconButton(
+                        painterResource(id = R.drawable.menu_open),
+                        contentDescription = stringResource(id = R.string.open_menu),
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        //onClick
+                        viewModel.turnSidebarMenu()
+                    }
                 }
             }
         }) {
             ProfileScreenBody(navController)
         }
 
-        //region sidebar
-        AnimatedVisibility(
-            visible = viewModel.enableSettingsMenu, enter = slideInHorizontally(
-                initialOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(
-                    durationMillis = 300, easing = LinearOutSlowInEasing
+        if (viewModel.getActualUserUid() == viewModel.getActualUserUid()) {
+            //region Menu opciones
+            AnimatedVisibility(
+                visible = viewModel.enableSettingsMenu, enter = slideInHorizontally(
+                    initialOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(
+                        durationMillis = 300, easing = LinearOutSlowInEasing
+                    )
+                ), exit = slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(
+                        durationMillis = 200, easing = FastOutLinearInEasing
+                    )
                 )
-            ), exit = slideOutHorizontally(
-                targetOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(
-                    durationMillis = 200, easing = FastOutLinearInEasing
-                )
-            )
-        ) {
-            //Si estoy en esta pantalla cuando le doy al botón de atrás no quiero cambiar de pantalla
-            //Si no que este menú se vuelva a plegar
-            BackPressHandler(viewModel::turnSidebarMenu)
-            SideBar(
-                modifier = Modifier.background(MaterialTheme.colors.background),
-                switchSettings = viewModel::turnSidebarMenu
             ) {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp), verticalArrangement = Arrangement.SpaceEvenly
+                //Si estoy en esta pantalla cuando le doy al botón de atrás no quiero cambiar de pantalla
+                //Si no que este menú se vuelva a plegar
+                BackPressHandler(viewModel::turnSidebarMenu)
+                SideBar(
+                    modifier = Modifier.background(MaterialTheme.colors.background),
+                    switchSettings = viewModel::turnSidebarMenu
                 ) {
 
-                    //TODO implementar
-                    /*
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(20.dp), verticalArrangement = Arrangement.SpaceEvenly
+                    ) {
+
+                        //TODO implementar
+                        //region Botón para cambiar de tema
+                        /*
                     Row() {
                         Box() {
                             TextIconButton(
@@ -157,25 +153,25 @@ fun ProfileScreen(
                         }
                     }
                     */
+                        //endregion
 
+                        TextIconButton(
+                            text = stringResource(id = R.string.logout),
+                            iconId = R.drawable.logout,
+                            contentDescription = stringResource(id = R.string.logout)
+                        ) {
+                            viewModel.logOut()
+                            navController.navigate(Destinations.RegisterScreen.ruta) {
+                                popUpTo(Destinations.HomeScreen.ruta) { inclusive = true }
+                            }
 
-                    TextIconButton(
-                        text = stringResource(id = R.string.logout),
-                        iconId = R.drawable.logout,
-                        contentDescription = stringResource(id = R.string.logout)
-                    ) {
-                        viewModel.logOut()
-                        navController.navigate(Destinations.RegisterScreen.ruta) {
-                            //todo fix
-                            navController.popBackStack()
                         }
-
                     }
-                }
 
-            }
+                }
+            }     //endregion
         }
-        //endregion
+
     }
 
 }
@@ -185,6 +181,10 @@ fun ProfileScreenBody(
     navController: NavHostController? = null,
     viewModel: ProfileScreenViewModel = hiltViewModel()
 ) {
+
+
+
+
     Column(
         Modifier
             .fillMaxSize()
@@ -203,15 +203,19 @@ fun ProfileScreenBody(
                 ) {
 
                     Box {
-                        Image(
-                            painter = painterResource(R.drawable.test2),
-                            contentDescription = "Banner",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .height(175.dp)
-                                .background(MaterialTheme.colors.onSecondary)
-                        )
+                            Image(
+                                painter = rememberAsyncImagePainter(viewModel.banner),
+                                contentDescription = "Banner",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .height(175.dp)
+                                    .background(MaterialTheme.colors.onSecondary)
+                                    .clickable(enabled = viewModel.onEditMode) {
+                                        
+                                    }
+                            )
+
                         Divider(
                             color = MaterialTheme.colors.primary,
                             thickness = 1.dp,
@@ -237,14 +241,30 @@ fun ProfileScreenBody(
                     .height(IntrinsicSize.Max)
                     .padding(horizontal = 25.dp)
             ) {
-                Image(
-                    painter = painterResource(R.drawable.test),
-                    contentDescription = "Image",
-                    contentScale = ContentScale.Crop,
+                Box(
                     modifier = Modifier
                         .size(150.dp)
-                        .clip(CircleShape)
-                )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colors.background)
+                    )
+
+                    Image(
+                        painter = rememberAsyncImagePainter(viewModel.pfp),
+                        contentDescription = "Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clip(CircleShape)
+                            .clickable(enabled = viewModel.onEditMode) {
+                            }
+                    )
+
+                }
+
 
                 Row(
                     Modifier
@@ -296,13 +316,13 @@ fun ProfileScreenBody(
                 Column {
                     Spacer(modifier = Modifier.size(10.dp))
                     Text(
-                        text = "Alejandro González Parra",
+                        text = viewModel.userData.name ?: "",
                         style = MaterialTheme.typography.subtitle1,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.size(10.dp))
                     Text(
-                        text = "La primavera llegó y los árboles comenzaron a florecer, el sol brilla más fuerte y los días se vuelven más largos, trayendo consigo una sensación renovada de esperanza y energía.",
+                        text = viewModel.userData.description ?: "",
                         style = MaterialTheme.typography.body1
                     )
                     Spacer(modifier = Modifier.size(10.dp))
@@ -312,8 +332,26 @@ fun ProfileScreenBody(
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Column() {
-                    OutlinedButton(onClick = { /*TODO*/ }) {
-                        Text(text = "Editar perfil")
+                    if (!viewModel.onEditMode) {
+                        if (viewModel.getActualUserUid() == viewModel.getActualUserUid()) {
+                            OutlinedButton(onClick = { viewModel.switchEditMode() }) {
+                                Text(text = stringResource(id = R.string.edit_profile))
+                            }
+                        } else {
+                            OutlinedButton(onClick = { /*todo*/ }) {
+                                Text(text = stringResource(id = R.string.follow))
+                            }
+                        }
+                    } else {
+                        Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                            OutlinedButton(onClick = { /*todo*/ }) {
+                                Text(text = stringResource(id = R.string.save_changes))
+                            }
+                            Spacer(modifier = Modifier.size(10.dp))
+                            OutlinedButton(onClick = { viewModel.switchEditMode() }) {
+                                Text(text = stringResource(id = R.string.cancel_changes))
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.size(10.dp))
                 }
@@ -334,5 +372,10 @@ fun ProfileScreenBody(
 
         //endregion
 
+
     }
+
+
 }
+
+
