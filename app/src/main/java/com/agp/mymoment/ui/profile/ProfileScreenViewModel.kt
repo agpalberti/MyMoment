@@ -32,6 +32,8 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
     var onEditMode by savedStateHandle.saveable{ mutableStateOf(false) }
     var bitmap by savedStateHandle.saveable { mutableStateOf<Bitmap>(Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888)) }
 
+    var editingName by savedStateHandle.saveable { mutableStateOf("") }
+    var editingBio by savedStateHandle.saveable { mutableStateOf("") }
 
     fun turnSidebarMenu() {
         enableSettingsMenu = !enableSettingsMenu
@@ -63,12 +65,21 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
             DBM.getUserData().collect {
                 userData = it
                 updateImages(uid)
+
             }
+
         }
+        resetEditFields()
     }
 
+    fun uploadUserData(){
+        DBM.uploadUserData(editingName, userData.nickname!!, editingBio)
+    }
+    fun resetEditFields(){
+        editingName = userData.name?:""
+        editingBio = userData.description?:""
+    }
     fun getActualUserUid() = DBM.getLoggedUserUid()
-
 
     private suspend fun updateImages(uid: String) {
         this.pfp = DBM.getPFP(uid)
@@ -76,7 +87,6 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
         this.banner = DBM.getBanner(uid)
 
     }
-
 
     fun uploadNewPfp(bitmap: Bitmap, context: Context){
         val pfp = bitmapToPNG(bitmap, context)

@@ -33,4 +33,8 @@
     <string name="save_changes">Guardar</string>
     <string name="cancel_changes">Cancelar</string>
     <string name="follow">Seguir</string>
+    <string name="following">Siguiendo</string>
+    <string name="followers">Seguidores</string>
+    <string name="pfp">Imagen de perfil</string>
+    <string name="banner">Banner</string>
 </resources>

@@ -188,7 +188,7 @@ class DBM {
                     }
                     .addOnFailureListener{e ->
                         Log.w("User", "No hay PFP", e)
-                        c.resume("https://www.pngitem.com/pimgs/m/22-223968_default-profile-picture-circle-hd-png-download.png")
+                        c.resume("https://mario.wiki.gallery/images/thumb/3/31/Green_Star_Artwork_-_Super_Mario_3D_World.png/800px-Green_Star_Artwork_-_Super_Mario_3D_World.png")
                     }
 
             } else Log.e("User", "Error en la sesión")
@@ -204,7 +204,7 @@ class DBM {
                     }
                     .addOnFailureListener{e ->
                         Log.w("User", "No hay banner", e)
-                        c.resume("https://wallpaperstock.net/wallpapers/thumbs1/51439hd.jpg")
+                        c.resume("https://sftool.gov/Content/Images/GPC/gpc-jumbotron-bg.jpg")
                     }
 
             } else Log.e("User", "Error en la sesión")
@@ -221,6 +221,19 @@ class DBM {
                 trySend(user)
             }
             awaitClose{channel.close()}
+        }
+
+        fun uploadUserData(name:String, nickname:String, description:String){
+            val user = FirebaseAuth.getInstance().currentUser
+            val db = FirebaseFirestore.getInstance()
+            val userMap = User(name, nickname, description)
+            db.collection("users")
+                .document(user?.uid!!)
+                .set(userMap).addOnSuccessListener {
+                    Log.i("User", "Actualizado correctamente")
+                }.addOnSuccessListener {
+                    Log.e("User", "No se pudo actualizar")
+                }
         }
 
         fun getLoggedUserUid(): String {

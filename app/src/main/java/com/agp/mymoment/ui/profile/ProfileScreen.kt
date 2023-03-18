@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -49,6 +48,7 @@ fun ProfileScreen(
 
     Box() {
 
+        //region navBar
         ThemedNavBar(navController = navController, topBarContent = {
             Row(Modifier.fillMaxWidth(0.5f), Arrangement.Start) {
                 Text(
@@ -69,7 +69,9 @@ fun ProfileScreen(
                     }
                 }
             }
-        }) {
+        })
+        //endregion navBar
+        {
             ProfileScreenBody(navController)
         }
 
@@ -182,6 +184,31 @@ fun ProfileScreenBody(
     viewModel: ProfileScreenViewModel = hiltViewModel()
 ) {
 
+    val context = LocalContext.current
+    var bannerImageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val bannerBitmap =  remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    val bannerLauncher = rememberLauncherForActivityResult(contract =
+    ActivityResultContracts.GetContent()) { uri: Uri? ->
+        bannerImageUri = uri
+    }
+
+    var pfpImageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    val pfpBitmap = remember{
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    val pfpLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()){ uri: Uri? ->
+        pfpImageUri = uri
+    }
 
 
 
@@ -202,26 +229,52 @@ fun ProfileScreenBody(
                         .background(MaterialTheme.colors.onSecondary)
                 ) {
 
+                    //region Banner
                     Box {
+                        if (bannerImageUri == null) {
                             Image(
                                 painter = rememberAsyncImagePainter(viewModel.banner),
-                                contentDescription = "Banner",
+                                contentDescription = stringResource(id = R.string.banner),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .height(175.dp)
                                     .background(MaterialTheme.colors.onSecondary)
                                     .clickable(enabled = viewModel.onEditMode) {
-                                        
+                                        bannerLauncher.launch("image/*")
                                     }
                             )
+                        } else {
+                            bannerImageUri?.let {
+                                if (Build.VERSION.SDK_INT < 28) {
+                                    bannerBitmap.value = MediaStore.Images
+                                        .Media.getBitmap(context.contentResolver, it)
+                                } else {
+                                    val source = ImageDecoder
+                                        .createSource(context.contentResolver, it)
+                                    bannerBitmap.value = ImageDecoder.decodeBitmap(source)
+                                }
+                                bannerBitmap.value?.let { btm ->
+                                    Image(bitmap = btm.asImageBitmap(),
+                                        contentDescription = stringResource(id = R.string.banner),
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .height(175.dp)
+                                            .background(MaterialTheme.colors.onSecondary)
+                                            .clickable(enabled = viewModel.onEditMode) {
+                                                bannerLauncher.launch("image/*")
+                                            })
+                                }
+                            }
 
+                        }
                         Divider(
                             color = MaterialTheme.colors.primary,
                             thickness = 1.dp,
                             modifier = Modifier.align(Alignment.BottomCenter)
                         )
                     }
+                    //endregion
                 }
             }
         }
@@ -235,12 +288,14 @@ fun ProfileScreenBody(
                 .offset(y = (-80).dp)
         ) {
 
-            //region PFP
+
             Row(
                 Modifier
                     .height(IntrinsicSize.Max)
                     .padding(horizontal = 25.dp)
             ) {
+
+                //region PFP
                 Box(
                     modifier = Modifier
                         .size(150.dp)
@@ -252,19 +307,45 @@ fun ProfileScreenBody(
                             .background(MaterialTheme.colors.background)
                     )
 
-                    Image(
-                        painter = rememberAsyncImagePainter(viewModel.pfp),
-                        contentDescription = "Image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .matchParentSize()
-                            .clip(CircleShape)
-                            .clickable(enabled = viewModel.onEditMode) {
+                    if (pfpImageUri == null){
+                        Image(
+                            painter = rememberAsyncImagePainter(viewModel.pfp),
+                            contentDescription = stringResource(id = R.string.pfp),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clip(CircleShape)
+                                .clickable(enabled = viewModel.onEditMode) {
+                                    pfpLauncher.launch("image/*")
+                                }
+                        )
+                    } else {
+                        pfpImageUri?.let {
+                            if (Build.VERSION.SDK_INT < 28) {
+                                pfpBitmap.value = MediaStore.Images
+                                    .Media.getBitmap(context.contentResolver, it)
+                            } else {
+                                val source = ImageDecoder
+                                    .createSource(context.contentResolver, it)
+                                pfpBitmap.value = ImageDecoder.decodeBitmap(source)
                             }
-                    )
+                            pfpBitmap.value?.let { btm ->
+                                Image(
+                                    bitmap = btm.asImageBitmap(),
+                                    contentDescription = stringResource(id = R.string.pfp),
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .clip(CircleShape)
+                                        .clickable(enabled = viewModel.onEditMode) {
+                                            pfpLauncher.launch("image/*")
+                                        })
+                            }
+                        }
+                    }
 
                 }
-
+                //endregion
 
                 Row(
                     Modifier
@@ -272,6 +353,7 @@ fun ProfileScreenBody(
                         .padding(start = 20.dp)
                         .offset(y = (85).dp)
                 ) {
+                    //region Seguidores
                     Column(
                         Modifier
                             .fillMaxWidth(0.5f)
@@ -288,8 +370,11 @@ fun ProfileScreenBody(
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.primary
                         )
-                        Text(text = "Seguidores", style = MaterialTheme.typography.body1)
+                        Text(text = stringResource(id = R.string.followers), style = MaterialTheme.typography.body1)
                     }
+                    //endregion
+
+                    //region Seguidos
                     Column(
                         Modifier
                             .fillMaxWidth()
@@ -307,29 +392,46 @@ fun ProfileScreenBody(
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.primary
                         )
-                        Text(text = "Siguiendo", style = MaterialTheme.typography.body1)
+                        Text(text = stringResource(id = R.string.following), style = MaterialTheme.typography.body1)
                     }
+                    //endregion
                 }
             }
 
+            //region Nombre y biografía
             Row(Modifier.padding(horizontal = 15.dp)) {
-                Column {
-                    Spacer(modifier = Modifier.size(10.dp))
-                    Text(
-                        text = viewModel.userData.name ?: "",
-                        style = MaterialTheme.typography.subtitle1,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.size(10.dp))
-                    Text(
-                        text = viewModel.userData.description ?: "",
-                        style = MaterialTheme.typography.body1
-                    )
-                    Spacer(modifier = Modifier.size(10.dp))
+                if (!viewModel.onEditMode) {
+                    Column {
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text(
+                            text = viewModel.userData.name ?: "",
+                            style = MaterialTheme.typography.subtitle1,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                        Text(
+                            text = viewModel.userData.description ?: "",
+                            style = MaterialTheme.typography.body1
+                        )
+                        Spacer(modifier = Modifier.size(10.dp))
+                    }
+                } else {
+                    Column {
+                        Spacer(modifier = Modifier.size(10.dp))
+
+                        OutlinedTextField(value = viewModel.editingName, onValueChange = {viewModel.editingName = it})
+                        Spacer(modifier = Modifier.size(10.dp))
+
+                        OutlinedTextField(value = viewModel.editingBio, onValueChange = {viewModel.editingBio = it})
+                        Spacer(modifier = Modifier.size(10.dp))
+                    }
+
                 }
-
+                //endregion
             }
+            //endregion
 
+            //region Editar perfil
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Column() {
                     if (!viewModel.onEditMode) {
@@ -344,11 +446,21 @@ fun ProfileScreenBody(
                         }
                     } else {
                         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                            OutlinedButton(onClick = { /*todo*/ }) {
+                            OutlinedButton(onClick = {
+                                if(pfpImageUri != null) viewModel.uploadNewPfp(pfpBitmap.value!!, context)
+                                if(bannerImageUri != null) viewModel.uploadNewBanner(bannerBitmap.value!!, context)
+                                viewModel.uploadUserData()
+                                viewModel.updateUserData(viewModel.getActualUserUid())
+                                viewModel.switchEditMode()
+                            }) {
                                 Text(text = stringResource(id = R.string.save_changes))
                             }
                             Spacer(modifier = Modifier.size(10.dp))
-                            OutlinedButton(onClick = { viewModel.switchEditMode() }) {
+                            OutlinedButton(onClick = {
+                                bannerImageUri = null
+                                viewModel.resetEditFields()
+                                viewModel.switchEditMode()
+                            }) {
                                 Text(text = stringResource(id = R.string.cancel_changes))
                             }
                         }
@@ -356,6 +468,7 @@ fun ProfileScreenBody(
                     Spacer(modifier = Modifier.size(10.dp))
                 }
             }
+            //endregion
 
             Row(Modifier.fillMaxWidth()) {
 
@@ -365,16 +478,8 @@ fun ProfileScreenBody(
                 )
             }
         }
-
-
         //endregion
-
-
-        //endregion
-
-
     }
-
 
 }
 

@@ -13,8 +13,10 @@ import androidx.navigation.NavHostController
 import com.agp.mymoment.ui.composables.ThemedNavBar
 
 @Composable
-fun UploadScreen(navController: NavHostController){
-    UploadScreenBody(navController)
+fun UploadScreen(navController: NavHostController) {
+    ThemedNavBar(navController = navController, topBarContent = {}) {
+        UploadScreenBody(navController)
+    }
 }
 
 @Composable
@@ -23,10 +25,11 @@ fun UploadScreenBody(
     navController: NavHostController? = null,
     viewModel: UploadScreenViewModel = hiltViewModel()
 ) {
-
-    ThemedNavBar(navController = navController!!, topBarContent = {}) {
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Subir")
-        }
+    Column(
+        Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Subir")
     }
 }
