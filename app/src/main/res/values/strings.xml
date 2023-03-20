@@ -37,4 +37,6 @@
     <string name="followers">Seguidores</string>
     <string name="pfp">Imagen de perfil</string>
     <string name="banner">Banner</string>
+    <string name="camera">Camara</string>
+    <string name="ok">Ok</string>
 </resources>
