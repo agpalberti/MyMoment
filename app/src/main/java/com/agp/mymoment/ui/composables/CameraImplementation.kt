@@ -1,23 +1,28 @@
 package com.agp.mymoment.ui.composables
 
+import android.Manifest
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import android.util.Log
 import android.view.ViewGroup
 import androidx.camera.core.*
+import androidx.camera.core.ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -27,6 +32,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionRequired
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.Executor
@@ -107,44 +114,83 @@ fun CameraPreview(
     )
 }
 
+@ExperimentalPermissionsApi
+@ExperimentalCoroutinesApi
+
 @Composable
 fun CameraCapture(
     modifier: Modifier = Modifier,
-    cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+    cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
+    onImageFile: (File) -> Unit = { }
 ) {
-    Box(modifier = modifier) {
-        val context = LocalContext.current
-        val lifecycleOwner = LocalLifecycleOwner.current
-        var previewUseCase by remember { mutableStateOf<UseCase>(Preview.Builder().build()) }
-        CameraPreview(
-            modifier = Modifier.fillMaxSize(),
-            onUseCase = {
-                previewUseCase = it
+    val context = LocalContext.current
+    Permission(
+        permission = Manifest.permission.CAMERA,
+        rationale = "You said you wanted a picture, so I'm going to have to ask for permission.",
+        permissionNotAvailableContent = {
+            Column(modifier) {
+                Text("O noes! No Camera!")
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = {
+                    context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    })
+                }) {
+                    Text("Open Settings")
+                }
             }
-        )
-        Button(
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(16.dp)
-                .align(Alignment.BottomCenter),
-            onClick = { /* TODO: Capture code */ }
-        ) {
-            Text("Click!")
         }
-        LaunchedEffect(previewUseCase) {
-            val cameraProvider = context.getCameraProvider()
-            try {
-                // Unbindeamos los casos de usos antes de reunirlos
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
-                    lifecycleOwner, cameraSelector, previewUseCase
+    ) {
+        Box(modifier = modifier) {
+            val lifecycleOwner = LocalLifecycleOwner.current
+            val coroutineScope = rememberCoroutineScope()
+            var previewUseCase by remember { mutableStateOf<UseCase>(Preview.Builder().build()) }
+            val imageCaptureUseCase by remember {
+                mutableStateOf(
+                    ImageCapture.Builder()
+                        .setCaptureMode(CAPTURE_MODE_MAXIMIZE_QUALITY)
+                        .build()
                 )
-            } catch (e: Exception) {
-                Log.e("Camara", "Error al binear los useCases", e)
+            }
+            Box {
+                CameraPreview(
+                    modifier = Modifier.fillMaxSize(),
+                    onUseCase = {
+                        previewUseCase = it
+                    }
+                )
+                Button(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .padding(16.dp)
+                        .align(Alignment.BottomCenter),
+                    onClick = {
+                        coroutineScope.launch {
+                            imageCaptureUseCase.takePicture(context.executor).let {
+                                onImageFile(it)
+                            }
+                        }
+                    }
+                ) {
+                    Text("Click!")
+                }
+            }
+            LaunchedEffect(previewUseCase) {
+                val cameraProvider = context.getCameraProvider()
+                try {
+                    // Must unbind the use-cases before rebinding them.
+                    cameraProvider.unbindAll()
+                    cameraProvider.bindToLifecycle(
+                        lifecycleOwner, cameraSelector, previewUseCase, imageCaptureUseCase
+                    )
+                } catch (ex: Exception) {
+                    Log.e("CameraCapture", "Failed to bind camera use cases", ex)
+                }
             }
         }
     }
 }
+
 
 suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutine { c ->
     ProcessCameraProvider.getInstance(this).also { future ->
@@ -171,6 +217,7 @@ suspend fun ImageCapture.takePicture(executor: Executor): File {
             override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                 continuation.resume(photoFile)
             }
+
             override fun onError(e: ImageCaptureException) {
                 Log.e("TakePicture", "Image capture failed", e)
                 continuation.resumeWithException(e)

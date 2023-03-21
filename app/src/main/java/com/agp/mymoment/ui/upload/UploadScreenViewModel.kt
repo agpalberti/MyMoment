@@ -1,24 +1,17 @@
 package com.agp.mymoment.ui.upload
 
-import android.content.Context
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.content.ContextCompat
+import android.net.Uri
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
+import androidx.lifecycle.viewmodel.compose.saveable
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.concurrent.Executor
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class UploadScreenViewModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel(){
-
-
-
-
-
-
+    val emptyImageUri = Uri.parse("file://dev/null")
+    var imageUri by savedStateHandle.saveable { mutableStateOf(emptyImageUri) }
 }

@@ -1,37 +1,25 @@
 package com.agp.mymoment.ui.upload
 
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
-import android.util.Log
-import android.view.ViewGroup
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.UseCase
-import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.AlertDialog
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.agp.mymoment.ui.composables.CameraCapture
-import com.agp.mymoment.ui.composables.CameraPreview
-import com.agp.mymoment.ui.composables.Permission
 import com.agp.mymoment.ui.composables.ThemedNavBar
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionRequired
-import com.google.accompanist.permissions.rememberPermissionState
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Composable
 fun UploadScreen(navController: NavHostController) {
@@ -40,42 +28,36 @@ fun UploadScreen(navController: NavHostController) {
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalCoroutinesApi::class)
 @Composable
 @Preview
 fun UploadScreenBody(
     navController: NavHostController? = null,
     viewModel: UploadScreenViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
-    Permission(
-        permission = android.Manifest.permission.CAMERA,
-        rationale = "You said you wanted a picture, so I'm going to have to ask for permission.",
-        permissionNotAvailableContent = {
-            Column(
-                Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("O noes! No Camera!")
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = {
-                    context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", context.packageName, null)
-                    })
-
-                }) {
-                    Text("Open Settings")
+    if (viewModel.imageUri != viewModel.emptyImageUri) {
+        Box(modifier = Modifier) {
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = rememberAsyncImagePainter(viewModel.imageUri),
+                contentDescription = "Captured image"
+            )
+            Button(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                onClick = {
+                    viewModel.imageUri = viewModel.emptyImageUri
                 }
+            ) {
+                Text("Remove image")
             }
         }
-    ) {
-        Column(
-            Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CameraCapture()
-        }
+    } else {
+        CameraCapture(
+            modifier = Modifier,
+            onImageFile = { file ->
+                viewModel.imageUri = file.toUri()
+            }
+        )
     }
 }
 

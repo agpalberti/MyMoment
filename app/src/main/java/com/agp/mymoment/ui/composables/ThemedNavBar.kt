@@ -17,8 +17,6 @@ fun ThemedNavBar(navController: NavController, topBarContent:@Composable RowScop
         bottomBar = { BottomNavigationBar(navController = navController) },
         backgroundColor = MaterialTheme.colors.background
     ) {
-
-
         content.invoke()
     }
 }
