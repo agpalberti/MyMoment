@@ -4,11 +4,15 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
+import androidx.camera.core.ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
@@ -20,10 +24,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -31,10 +37,7 @@ import com.agp.mymoment.R
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionRequired
 import com.google.accompanist.permissions.rememberPermissionState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
@@ -114,15 +117,24 @@ fun CameraPreview(
     )
 }
 
+
 @ExperimentalPermissionsApi
 @ExperimentalCoroutinesApi
-
 @Composable
+@androidx.annotation.OptIn(androidx.camera.core.ExperimentalZeroShutterLag::class)
 fun CameraCapture(
     modifier: Modifier = Modifier,
     cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
     onImageFile: (File) -> Unit = { }
 ) {
+
+    var camera by remember {
+        mutableStateOf(cameraSelector)
+    }
+    var onClickEnable by remember {
+        mutableStateOf(true)
+    }
+
     val context = LocalContext.current
     Permission(
         permission = Manifest.permission.CAMERA,
@@ -148,7 +160,7 @@ fun CameraCapture(
             val imageCaptureUseCase by remember {
                 mutableStateOf(
                     ImageCapture.Builder()
-                        .setCaptureMode(CAPTURE_MODE_MAXIMIZE_QUALITY)
+                        .setCaptureMode(CAPTURE_MODE_ZERO_SHUTTER_LAG)
                         .build()
                 )
             }
@@ -159,20 +171,64 @@ fun CameraCapture(
                         previewUseCase = it
                     }
                 )
-                Button(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(16.dp)
-                        .align(Alignment.BottomCenter),
-                    onClick = {
-                        coroutineScope.launch {
-                            imageCaptureUseCase.takePicture(context.executor).let {
-                                onImageFile(it)
+                Row(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .offset(y = (-50).dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        enabled = onClickEnable,
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(16.dp),
+                        onClick = {
+
+                            coroutineScope.launch {
+                                onClickEnable = false
+                                imageCaptureUseCase.takePicture(context.executor).let {
+                                    onImageFile(it)
+                                    delay(1000)
+                                    onClickEnable = true
+                                }
                             }
                         }
+                    ) {
+                        Image(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.camera),
+                            contentDescription = "Camera"
+                        )
                     }
+                }
+
+                Row(
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(y = (-50).dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Click!")
+                    IconButton(enabled = onClickEnable, modifier = Modifier
+                        .wrapContentSize()
+                        .padding(16.dp),
+                        onClick = {
+                            coroutineScope.launch {
+                                // FIXME: Actualizar view
+                                onClickEnable = false
+                                camera =
+                                    if (camera == CameraSelector.DEFAULT_BACK_CAMERA) CameraSelector.DEFAULT_FRONT_CAMERA
+                                    else CameraSelector.DEFAULT_BACK_CAMERA
+                                previewUseCase = Preview.Builder().build()
+                                delay(1000)
+                                onClickEnable = true
+                            }
+                        }) {
+                        Image(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.cameraswitch),
+                            contentDescription = "Change camera"
+                        )
+                    }
                 }
             }
             LaunchedEffect(previewUseCase) {
@@ -181,7 +237,7 @@ fun CameraCapture(
                     // Must unbind the use-cases before rebinding them.
                     cameraProvider.unbindAll()
                     cameraProvider.bindToLifecycle(
-                        lifecycleOwner, cameraSelector, previewUseCase, imageCaptureUseCase
+                        lifecycleOwner, camera, previewUseCase, imageCaptureUseCase
                     )
                 } catch (ex: Exception) {
                     Log.e("CameraCapture", "Failed to bind camera use cases", ex)
@@ -190,7 +246,6 @@ fun CameraCapture(
         }
     }
 }
-
 
 suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutine { c ->
     ProcessCameraProvider.getInstance(this).also { future ->
