@@ -4,14 +4,10 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.view.ViewGroup
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
-import androidx.camera.core.ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -27,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -50,7 +45,7 @@ val Context.executor: Executor
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun Permission(
-    permission: String = android.Manifest.permission.CAMERA,
+    permission: String = Manifest.permission.CAMERA,
     rationale: String = "This permission is important for this app. Please grant the permission.",
     permissionNotAvailableContent: @Composable () -> Unit = { },
     content: @Composable () -> Unit = { }
@@ -136,6 +131,7 @@ fun CameraCapture(
     }
 
     val context = LocalContext.current
+    var frontCamera = false
     Permission(
         permission = Manifest.permission.CAMERA,
         rationale = "You said you wanted a picture, so I'm going to have to ask for permission.",
@@ -154,6 +150,7 @@ fun CameraCapture(
         }
     ) {
         Box(modifier = modifier) {
+
             val lifecycleOwner = LocalLifecycleOwner.current
             val coroutineScope = rememberCoroutineScope()
             var previewUseCase by remember { mutableStateOf<UseCase>(Preview.Builder().build()) }
@@ -214,12 +211,17 @@ fun CameraCapture(
                         .padding(16.dp),
                         onClick = {
                             coroutineScope.launch {
-                                // FIXME: Actualizar view
                                 onClickEnable = false
                                 camera =
-                                    if (camera == CameraSelector.DEFAULT_BACK_CAMERA) CameraSelector.DEFAULT_FRONT_CAMERA
-                                    else CameraSelector.DEFAULT_BACK_CAMERA
-                                previewUseCase = Preview.Builder().build()
+                                    if (camera == CameraSelector.DEFAULT_BACK_CAMERA) {
+                                        frontCamera = !frontCamera
+                                        CameraSelector.DEFAULT_FRONT_CAMERA
+                                    }
+                                    else {
+                                        frontCamera = !frontCamera
+                                        CameraSelector.DEFAULT_BACK_CAMERA
+                                    }
+
                                 delay(1000)
                                 onClickEnable = true
                             }
@@ -231,7 +233,8 @@ fun CameraCapture(
                     }
                 }
             }
-            LaunchedEffect(previewUseCase) {
+            LaunchedEffect(frontCamera) {
+                // FIXME: Flip camara frontal
                 val cameraProvider = context.getCameraProvider()
                 try {
                     // Must unbind the use-cases before rebinding them.
@@ -254,7 +257,6 @@ suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutin
         }, executor)
     }
 }
-
 
 suspend fun ImageCapture.takePicture(executor: Executor): File {
     val photoFile = withContext(Dispatchers.IO) {
