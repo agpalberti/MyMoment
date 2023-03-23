@@ -7,6 +7,8 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.Log
 import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -134,17 +136,17 @@ fun CameraCapture(
     var frontCamera = false
     Permission(
         permission = Manifest.permission.CAMERA,
-        rationale = "You said you wanted a picture, so I'm going to have to ask for permission.",
+        rationale = stringResource(id = R.string.camera_permission),
         permissionNotAvailableContent = {
             Column(modifier) {
-                Text("O noes! No Camera!")
+                Text(stringResource(id = R.string.no_camera))
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(onClick = {
                     context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                         data = Uri.fromParts("package", context.packageName, null)
                     })
                 }) {
-                    Text("Open Settings")
+                    Text(stringResource(id = R.string.settings))
                 }
             }
         }
@@ -168,6 +170,34 @@ fun CameraCapture(
                         previewUseCase = it
                     }
                 )
+
+                Row(
+                    Modifier
+                        .align(Alignment.BottomStart)
+                        .offset(y = (-50).dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(enabled = onClickEnable, modifier = Modifier
+                        .wrapContentSize()
+                        .padding(16.dp),
+                        onClick = {
+                            coroutineScope.launch {
+                                onClickEnable = false
+
+
+
+                                delay(1000)
+                                onClickEnable = true
+                            }
+                        }) {
+                        Image(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.gallery),
+                            contentDescription = stringResource(id = R.string.gallery)
+                        )
+                    }
+                }
+
                 Row(
                     Modifier
                         .align(Alignment.BottomCenter)
@@ -178,7 +208,7 @@ fun CameraCapture(
                     IconButton(
                         enabled = onClickEnable,
                         modifier = Modifier
-                            .wrapContentSize()
+                            .size(100.dp)
                             .padding(16.dp),
                         onClick = {
 
@@ -193,8 +223,8 @@ fun CameraCapture(
                         }
                     ) {
                         Image(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.camera),
-                            contentDescription = "Camera"
+                            modifier = Modifier.size(120.dp), imageVector = ImageVector.vectorResource(id = R.drawable.camera),
+                            contentDescription = stringResource(id = R.string.camera)
                         )
                     }
                 }
@@ -228,13 +258,13 @@ fun CameraCapture(
                         }) {
                         Image(
                             imageVector = ImageVector.vectorResource(id = R.drawable.cameraswitch),
-                            contentDescription = "Change camera"
+                            contentDescription = stringResource(id = R.string.swich_camera)
                         )
                     }
                 }
             }
             LaunchedEffect(frontCamera) {
-                // FIXME: Flip camara frontal
+                // FIXME: Flip foto camara frontal
                 val cameraProvider = context.getCameraProvider()
                 try {
                     // Must unbind the use-cases before rebinding them.
@@ -243,7 +273,7 @@ fun CameraCapture(
                         lifecycleOwner, camera, previewUseCase, imageCaptureUseCase
                     )
                 } catch (ex: Exception) {
-                    Log.e("CameraCapture", "Failed to bind camera use cases", ex)
+                    Log.e("Camara", "Failed to bind camera use cases", ex)
                 }
             }
         }
@@ -263,7 +293,7 @@ suspend fun ImageCapture.takePicture(executor: Executor): File {
         kotlin.runCatching {
             File.createTempFile("image", "jpg")
         }.getOrElse { ex ->
-            Log.e("TakePicture", "Failed to create temporary file", ex)
+            Log.e("Camara", "Failed to create temporary file", ex)
             File("/dev/null")
         }
     }
@@ -276,7 +306,7 @@ suspend fun ImageCapture.takePicture(executor: Executor): File {
             }
 
             override fun onError(e: ImageCaptureException) {
-                Log.e("TakePicture", "Image capture failed", e)
+                Log.e("Camara", "Image capture failed", e)
                 continuation.resumeWithException(e)
             }
         })
