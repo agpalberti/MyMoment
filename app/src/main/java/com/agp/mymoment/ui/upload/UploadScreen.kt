@@ -81,6 +81,8 @@ fun UploadScreenBody(
                 onClick = {
                     //TODO
                     bitmap.value?.let { viewModel.uploadNewPost(it,context) }
+                    viewModel.imageUri = viewModel.emptyImageUri
+                    bitmap.value = null
 
                 }) {
                 Image(
@@ -117,6 +119,16 @@ fun UploadScreenBody(
                 onImageUri = { uri ->
                     viewModel.showGallerySelect = false
                     viewModel.imageUri = uri
+                    viewModel.imageUri?.let {
+                        if (Build.VERSION.SDK_INT < 28) {
+                            bitmap.value = MediaStore.Images
+                                .Media.getBitmap(context.contentResolver, it)
+                        } else {
+                            val source = ImageDecoder
+                                .createSource(context.contentResolver, it)
+                            bitmap.value = ImageDecoder.decodeBitmap(source)
+                        }
+                    }
                 }
             )
         }
