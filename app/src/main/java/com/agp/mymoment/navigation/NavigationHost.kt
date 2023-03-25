@@ -2,8 +2,10 @@ package com.agp.mymoment.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.agp.mymoment.ui.login.RegisterScreen
 import com.agp.mymoment.ui.home.HomeScreen
 import com.agp.mymoment.ui.notifications.NotificationScreen
@@ -31,8 +33,9 @@ fun NavigationHost(navController: NavHostController, startDestination: String){
             SearchScreen(navController = navController)
         }
 
-        composable(Destinations.ProfileScreen.ruta){
-            ProfileScreen(navController = navController)
+        composable("${Destinations.ProfileScreen.ruta}/{uid}", arguments = listOf(navArgument("uid"){type = NavType.StringType})){ backStackEntry ->
+            backStackEntry.arguments?.getString("uid")
+                ?.let { ProfileScreen(navController, userUID = it) }
         }
 
         composable(Destinations.UploadScreen.ruta){

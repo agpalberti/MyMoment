@@ -18,12 +18,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -42,10 +44,11 @@ import java.io.File
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
-    viewModel: ProfileScreenViewModel = hiltViewModel()
+    viewModel: ProfileScreenViewModel = hiltViewModel(),
+    userUID: String
 ) {
 
-    viewModel.updateUserData(viewModel.getActualUserUid())
+    viewModel.updateUserData(userUID)
 
     Box() {
 
@@ -59,7 +62,7 @@ fun ProfileScreen(
                 )
             }
             Row(Modifier.fillMaxWidth(), Arrangement.End) {
-                if (viewModel.getActualUserUid() == viewModel.getActualUserUid()) {
+                if (userUID == viewModel.getActualUserUid()) {
                     NoRippleIconButton(
                         painterResource(id = R.drawable.menu_open),
                         contentDescription = stringResource(id = R.string.open_menu),
@@ -73,10 +76,16 @@ fun ProfileScreen(
         })
         //endregion navBar
         {
-            ProfileScreenBody(navController)
+
+            LazyColumn {
+                item{
+                    ProfileScreenBody(navController, userUID = userUID)
+                }
+            }
+
         }
 
-        if (viewModel.getActualUserUid() == viewModel.getActualUserUid()) {
+        if (userUID == viewModel.getActualUserUid()) {
             //region Menu opciones
             AnimatedVisibility(
                 visible = viewModel.enableSettingsMenu, enter = slideInHorizontally(
@@ -182,7 +191,8 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenBody(
     navController: NavHostController? = null,
-    viewModel: ProfileScreenViewModel = hiltViewModel()
+    viewModel: ProfileScreenViewModel = hiltViewModel(),
+    userUID: String
 ) {
 
     val context = LocalContext.current
@@ -280,7 +290,7 @@ fun ProfileScreenBody(
             }
         }
 
-        //region BODY
+
         Column(
 
             Modifier
@@ -436,7 +446,7 @@ fun ProfileScreenBody(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Column() {
                     if (!viewModel.onEditMode) {
-                        if (viewModel.getActualUserUid() == viewModel.getActualUserUid()) {
+                        if (userUID == viewModel.getActualUserUid()) {
                             OutlinedButton(onClick = { viewModel.switchEditMode() }) {
                                 Text(text = stringResource(id = R.string.edit_profile))
                             }
@@ -478,8 +488,53 @@ fun ProfileScreenBody(
                     thickness = 1.dp,
                 )
             }
+
+            Row(Modifier.background(Color.Red).height(500.dp)) {
+                Text("ASDF")
+            }
+
+            Row(Modifier.background(Color.Yellow).height(500.dp)) {
+                Text("ASDF")
+
+            }
+
+            Row(Modifier.background(Color.Red).height(500.dp)) {
+                Text("ASDF")
+            }
+
+            Row(Modifier.background(Color.Yellow).height(500.dp)) {
+                Text("ASDF")
+
+            }
+
+            Row(Modifier.background(Color.Red).height(500.dp)) {
+                Text("ASDF")
+            }
+
+            Row(Modifier.background(Color.Yellow).height(500.dp)) {
+                Text("ASDF")
+
+            }
+
+            Row(Modifier.background(Color.Red).height(500.dp)) {
+                Text("ASDF")
+            }
+
+            Row(Modifier.background(Color.Yellow).height(500.dp)) {
+                Text("ASDF")
+
+            }
+
+            Row(Modifier.background(Color.Red).height(500.dp)) {
+                Text("ASDF")
+            }
+
+            Row(Modifier.background(Color.Yellow).height(500.dp)) {
+                Text("ASDF")
+
+            }
         }
-        //endregion
+
     }
 
 }

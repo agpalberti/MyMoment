@@ -4,25 +4,21 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.os.Build
 import android.provider.MediaStore
-import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -93,7 +89,6 @@ fun UploadScreenBody(
             }
         }
     } else {
-
         if (!viewModel.showGallerySelect) {
             CameraCapture(
                 modifier = Modifier,
@@ -114,19 +109,22 @@ fun UploadScreenBody(
                 }
             )
         } else {
+            BackPressHandler(onBackPressed = { viewModel.imageUri = viewModel.emptyImageUri })
             GallerySelect(
                 modifier = Modifier,
                 onImageUri = { uri ->
                     viewModel.showGallerySelect = false
                     viewModel.imageUri = uri
-                    viewModel.imageUri?.let {
-                        if (Build.VERSION.SDK_INT < 28) {
-                            bitmap.value = MediaStore.Images
-                                .Media.getBitmap(context.contentResolver, it)
-                        } else {
-                            val source = ImageDecoder
-                                .createSource(context.contentResolver, it)
-                            bitmap.value = ImageDecoder.decodeBitmap(source)
+                    if (viewModel.imageUri != viewModel.emptyImageUri){
+                        viewModel.imageUri?.let {
+                            if (Build.VERSION.SDK_INT < 28) {
+                                bitmap.value = MediaStore.Images
+                                    .Media.getBitmap(context.contentResolver, it)
+                            } else {
+                                val source = ImageDecoder
+                                    .createSource(context.contentResolver, it)
+                                bitmap.value = ImageDecoder.decodeBitmap(source)
+                            }
                         }
                     }
                 }

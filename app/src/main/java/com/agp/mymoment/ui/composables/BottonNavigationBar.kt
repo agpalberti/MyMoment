@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.agp.mymoment.R
+import com.agp.mymoment.model.DBM
 import com.agp.mymoment.navigation.Destinations
 
 @Composable
@@ -38,15 +39,28 @@ fun BottomNavigationBar(navController: NavController) {
                 unselectedContentColor = MaterialTheme.colors.secondary,
                 selected = currentRoute == item.ruta,
                 onClick =  {
-                    navController.navigate(item.ruta) {
+                    if (item.ruta != Destinations.ProfileScreen.ruta){
+                        navController.navigate(item.ruta) {
 
-                        navController.graph.startDestinationRoute?.let { screen_route ->
-                            popUpTo(screen_route) {
-                                saveState = true
+                            navController.graph.startDestinationRoute?.let { screen_route ->
+                                popUpTo(screen_route) {
+                                    saveState = true
+                                }
                             }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
+                    } else{
+                        navController.navigate("${Destinations.ProfileScreen.ruta}/${DBM.getLoggedUserUid()}") {
+
+                            navController.graph.startDestinationRoute?.let { screen_route ->
+                                popUpTo(screen_route) {
+                                    saveState = true
+                                }
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 }
             )

@@ -11,6 +11,7 @@ import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import java.io.File
@@ -204,6 +205,22 @@ class DBM {
 
             } else Log.e("User", "Error en la sesión")
         }
+
+        /*
+        TODO
+
+        fun getUserPosts(uid: String): Flow<List<Post>> = flow {
+
+            val db = Firebase.storage.reference.child("users/${uid}/posts")
+            val gameList = mutableListOf<Game>()
+
+            db.collection("Games").get().await().forEach{
+                gameList.add(Game(it.id,it.getString("Nombre").toString(),it.getString("Imagen").toString(),it.getString("AVGDuracion").toString(),it.getString("Descripcion").toString(),it.getString("Developers").toString(),it.getString("Generos").toString(), it.getString("ReleaseDate").toString()))
+            }
+
+            emit(gameList)
+        }
+        */
 
         suspend fun getPFP(uid: String): String = suspendCoroutine { c ->
             val pfp = Firebase.storage.reference.child("users/${uid}/pfp.png")
