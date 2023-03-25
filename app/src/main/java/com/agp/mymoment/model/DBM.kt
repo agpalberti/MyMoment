@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class DBM {
 
@@ -61,6 +63,7 @@ class DBM {
                 callback(-2) // Error genérico no gestionado
             }
         }
+
         fun onRegister(
             email: String,
             password: String,
@@ -82,7 +85,7 @@ class DBM {
                                     Log.w("Register", "2: Contraseña demasiado débil", e)
                                     callback(2)
                                 }
-                                is FirebaseAuthInvalidCredentialsException ->{
+                                is FirebaseAuthInvalidCredentialsException -> {
                                     Log.w("Register", "9: Formato de correo incorrecto", e)
                                     callback(9)
                                 }
@@ -97,7 +100,12 @@ class DBM {
                                 Log.i("Register", "Usuario creado correctamente")
                                 val user = mAuth.currentUser
                                 val db = FirebaseFirestore.getInstance()
-                                val userMap = User(name, nickname, MyPreferences.resources?.getString(com.agp.mymoment.R.string.default_desc)?:"")
+                                val userMap = User(
+                                    name,
+                                    nickname,
+                                    MyPreferences.resources?.getString(com.agp.mymoment.R.string.default_desc)
+                                        ?: ""
+                                )
                                 db.collection("users")
                                     .document(user?.uid!!)
                                     .set(userMap)
@@ -152,41 +160,60 @@ class DBM {
             FirebaseAuth.getInstance().signOut()
         }
 
-        fun uploadNewPfp(pfp: File){
+        fun uploadNewPost(image: File) {
+            val db = Firebase.storage.reference.child("users")
+            if (Firebase.auth.uid != null) {
+                val date = Date()
+                val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                db.child("${Firebase.auth.uid}/posts/${dateFormat.format(date)}.png")
+                    .putBytes(image.readBytes())
+                    .addOnSuccessListener {
+                        Log.i("Camara", "La foto se ha subido correctamente")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("Camara", "Firebase: Error al subir nuevo post", e)
+                    }
+
+            } else Log.e("User", "Error en la sesión")
+        }
+
+        fun uploadNewPfp(pfp: File) {
             val db = Firebase.storage.reference.child("users")
             if (Firebase.auth.uid != null) {
                 db.child("${Firebase.auth.uid}/pfp.png").putBytes(pfp.readBytes())
                     .addOnSuccessListener {
+                        Log.i("User", "La pfp se ha subido correctamente")
                     }
-                    .addOnFailureListener{ e->
-                        Log.e("User","Error al subir la foto de perfil",e)
+                    .addOnFailureListener { e ->
+                        Log.e("User", "Error al subir la foto de perfil", e)
                     }
 
             } else Log.e("User", "Error en la sesión")
         }
 
-        fun uploadNewBanner(banner: File){
+        fun uploadNewBanner(banner: File) {
             val db = Firebase.storage.reference.child("users")
             if (Firebase.auth.uid != null) {
                 db.child("${Firebase.auth.uid}/banner.png").putBytes(banner.readBytes())
                     .addOnSuccessListener {
+                        Log.i("User", "El banner se ha subido correctamente")
                     }
-                    .addOnFailureListener{ e->
-                        Log.e("User","Error al subir el banner",e)
+                    .addOnFailureListener { e ->
+                        Log.e("User", "Error al subir el banner", e)
                     }
 
             } else Log.e("User", "Error en la sesión")
         }
 
-        suspend fun getPFP(uid:String):String = suspendCoroutine{ c ->
+        suspend fun getPFP(uid: String): String = suspendCoroutine { c ->
             val pfp = Firebase.storage.reference.child("users/${uid}/pfp.png")
             if (Firebase.auth.uid != null) {
 
                 pfp.downloadUrl
-                    .addOnSuccessListener {url->
+                    .addOnSuccessListener { url ->
                         c.resume(url.toString())
                     }
-                    .addOnFailureListener{e ->
+                    .addOnFailureListener { e ->
                         Log.w("User", "No hay PFP", e)
                         c.resume("https://mario.wiki.gallery/images/thumb/3/31/Green_Star_Artwork_-_Super_Mario_3D_World.png/800px-Green_Star_Artwork_-_Super_Mario_3D_World.png")
                     }
@@ -194,15 +221,15 @@ class DBM {
             } else Log.e("User", "Error en la sesión")
         }
 
-        suspend fun getBanner(uid:String):String = suspendCoroutine{ c ->
+        suspend fun getBanner(uid: String): String = suspendCoroutine { c ->
             val banner = Firebase.storage.reference.child("users/${uid}/banner.png")
             if (Firebase.auth.uid != null) {
 
                 banner.downloadUrl
-                    .addOnSuccessListener {url->
+                    .addOnSuccessListener { url ->
                         c.resume(url.toString())
                     }
-                    .addOnFailureListener{e ->
+                    .addOnFailureListener { e ->
                         Log.w("User", "No hay banner", e)
                         c.resume("https://sftool.gov/Content/Images/GPC/gpc-jumbotron-bg.jpg")
                     }
@@ -215,15 +242,15 @@ class DBM {
             val userId = FirebaseAuth.getInstance().currentUser?.uid
             var user = User()
             db.collection("users").document(userId!!).get().addOnSuccessListener {
-                Log.i("User","Obtenido información")
+                Log.i("User", "Obtenido información")
                 val data = it.toObject(User::class.java)
-                if (data !=null) user = data
+                if (data != null) user = data
                 trySend(user)
             }
-            awaitClose{channel.close()}
+            awaitClose { channel.close() }
         }
 
-        fun uploadUserData(name:String, nickname:String, description:String){
+        fun uploadUserData(name: String, nickname: String, description: String) {
             val user = FirebaseAuth.getInstance().currentUser
             val db = FirebaseFirestore.getInstance()
             val userMap = User(name, nickname, description)
@@ -238,8 +265,8 @@ class DBM {
 
         fun getLoggedUserUid(): String {
             try {
-               return FirebaseAuth.getInstance().currentUser!!.uid
-            } catch (e:java.lang.NullPointerException){
+                return FirebaseAuth.getInstance().currentUser!!.uid
+            } catch (e: java.lang.NullPointerException) {
                 throw Exception("Se ha intentado recuperar el uid cuando no hay sesión")
             }
         }

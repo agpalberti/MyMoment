@@ -37,6 +37,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.agp.mymoment.R
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.composables.*
+import java.io.File
 
 @Composable
 fun ProfileScreen(

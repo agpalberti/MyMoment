@@ -13,6 +13,7 @@ import com.agp.mymoment.R
 import com.agp.mymoment.config.MyPreferences
 import com.agp.mymoment.model.DBM
 import com.agp.mymoment.model.classes.User
+import com.agp.mymoment.model.utilities.bitmapToPNG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
@@ -100,27 +101,6 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
         if (banner != null) {
             DBM.uploadNewBanner(banner)
         }
-    }
-
-    private fun bitmapToPNG(bitmap: Bitmap,context: Context): File?{
-
-        try {
-            val png = File(context.cacheDir, "filename.png")
-            png.createNewFile()
-
-            val outputStream = FileOutputStream(png)
-
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-
-            outputStream.flush()
-            outputStream.close()
-
-            return png
-        }catch (e:Exception){
-            Log.e("User","El bitmap está vacío", e)
-            return null
-        }
-
     }
 }
 

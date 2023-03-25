@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.view.ViewGroup
@@ -41,8 +42,11 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
+val EMPTY_IMAGE_URI: Uri = Uri.parse("file://dev/null")
+
 val Context.executor: Executor
     get() = ContextCompat.getMainExecutor(this)
+
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -122,7 +126,7 @@ fun CameraPreview(
 fun CameraCapture(
     modifier: Modifier = Modifier,
     cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
-    onImageFile: (File) -> Unit = { }
+    onImageFile: (File?) -> Unit = { }
 ) {
 
     var camera by remember {
@@ -185,7 +189,7 @@ fun CameraCapture(
                             coroutineScope.launch {
                                 onClickEnable = false
 
-
+                                onImageFile(null)
 
                                 delay(1000)
                                 onClickEnable = true
@@ -223,7 +227,8 @@ fun CameraCapture(
                         }
                     ) {
                         Image(
-                            modifier = Modifier.size(120.dp), imageVector = ImageVector.vectorResource(id = R.drawable.camera),
+                            modifier = Modifier.size(120.dp),
+                            imageVector = ImageVector.vectorResource(id = R.drawable.camera),
                             contentDescription = stringResource(id = R.string.camera)
                         )
                     }
@@ -246,8 +251,7 @@ fun CameraCapture(
                                     if (camera == CameraSelector.DEFAULT_BACK_CAMERA) {
                                         frontCamera = !frontCamera
                                         CameraSelector.DEFAULT_FRONT_CAMERA
-                                    }
-                                    else {
+                                    } else {
                                         frontCamera = !frontCamera
                                         CameraSelector.DEFAULT_BACK_CAMERA
                                     }
@@ -285,6 +289,66 @@ suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutin
         future.addListener({
             c.resume(future.get())
         }, executor)
+    }
+}
+
+
+@Composable
+fun GallerySelect(
+    modifier: Modifier = Modifier,
+    onImageUri: (Uri) -> Unit = { }
+) {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            onImageUri(uri ?: EMPTY_IMAGE_URI)
+        }
+    )
+
+    @Composable
+    fun LaunchGallery() {
+        SideEffect {
+            launcher.launch("image/*")
+        }
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        Permission(
+            permission = Manifest.permission.ACCESS_MEDIA_LOCATION,
+            rationale = stringResource(id = R.string.gallery_permission),
+            permissionNotAvailableContent = {
+                Column(modifier) {
+                    Text(stringResource(id = R.string.no_gallery))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row {
+                        Button(
+                            modifier = Modifier.padding(4.dp),
+                            onClick = {
+                                context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.fromParts("package", context.packageName, null)
+                                })
+                            }
+                        ) {
+                            Text(stringResource(id = R.string.settings))
+                        }
+                        // If they don't want to grant permissions, this button will result in going back
+                        Button(
+                            modifier = Modifier.padding(4.dp),
+                            onClick = {
+                                onImageUri(EMPTY_IMAGE_URI)
+                            }
+                        ) {
+                            Text(stringResource(id = R.string.use_camera))
+                        }
+                    }
+                }
+            },
+        ) {
+            LaunchGallery()
+        }
+    } else {
+        LaunchGallery()
     }
 }
 
