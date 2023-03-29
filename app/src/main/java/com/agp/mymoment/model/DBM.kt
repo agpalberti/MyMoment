@@ -1,8 +1,11 @@
 package com.agp.mymoment.model
 
+import android.net.Uri
 import android.util.Log
 import com.agp.mymoment.config.MyPreferences
+import com.agp.mymoment.model.classes.Post
 import com.agp.mymoment.model.classes.User
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.*
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -161,20 +164,48 @@ class DBM {
             FirebaseAuth.getInstance().signOut()
         }
 
-        fun uploadNewPost(image: File) {
+        fun uploadPostImage(image: File): Task<Pair<Uri, String>> {
             val db = Firebase.storage.reference.child("users")
+            val date = Date()
+            val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+            val ref = db.child("${Firebase.auth.uid}/posts/${dateFormat.format(date)}.png")
+            return ref.putBytes(image.readBytes()).continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    Log.e("Camara", "Firebase: Error al subir nuevo post", task.exception)
+                    task.exception?.let { throw it }
+                }
+                Log.i("Camara", "La foto se ha subido correctamente")
+                ref.downloadUrl
+            }.continueWith { task ->
+                if (!task.isSuccessful) {
+                    task.exception?.let { throw it }
+                }
+                Pair(task.result!!, dateFormat.format(date))
+            }
+        }
+
+        fun uploadNewPost(image: File) {
             if (Firebase.auth.uid != null) {
-                val date = Date()
-                val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-                db.child("${Firebase.auth.uid}/posts/${dateFormat.format(date)}.png")
-                    .putBytes(image.readBytes())
-                    .addOnSuccessListener {
-                        Log.i("Camara", "La foto se ha subido correctamente")
+                uploadPostImage(image)
+                    .addOnSuccessListener { pair ->
+                        val post = Post(
+                            date = pair.second,
+                            likes = emptyList(),
+                            owner = getLoggedUserUid(),
+                            download_link = pair.first.toString()
+                        )
+                        val db = FirebaseFirestore.getInstance().collection("posts")
+                        db.document("${post.owner}_${post.date}").set(post)
+                            .addOnSuccessListener {
+                                Log.i("Post", "Nuevo post subido correctamente")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("Post", "Error al subir nuevo post", e)
+                            }
                     }
                     .addOnFailureListener { e ->
-                        Log.e("Camara", "Firebase: Error al subir nuevo post", e)
+                        Log.e("Camara", "Firebase: Error al subir la imagen", e)
                     }
-
             } else Log.e("User", "Error en la sesión")
         }
 
