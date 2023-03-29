@@ -11,10 +11,8 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import java.io.File
@@ -108,7 +106,8 @@ class DBM {
                                     name,
                                     nickname,
                                     MyPreferences.resources?.getString(com.agp.mymoment.R.string.default_desc)
-                                        ?: ""
+                                        ?: "",
+                                    emptyList()
                                 )
                                 db.collection("users")
                                     .document(user?.uid!!)
@@ -164,7 +163,7 @@ class DBM {
             FirebaseAuth.getInstance().signOut()
         }
 
-        fun uploadPostImage(image: File): Task<Pair<Uri, String>> {
+        fun uploadImage(image: File): Task<Pair<Uri, String>> {
             val db = Firebase.storage.reference.child("users")
             val date = Date()
             val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
@@ -184,18 +183,25 @@ class DBM {
             }
         }
 
-        fun uploadNewPost(image: File) {
-            if (Firebase.auth.uid != null) {
-                uploadPostImage(image)
+        suspend fun uploadNewPost(image: File) {
+            if (Firebase.auth.currentUser != null) {
+                var user:User?
+                user = getUserData(getLoggedUserUid()).first()
+                uploadImage(image)
                     .addOnSuccessListener { pair ->
                         val post = Post(
                             date = pair.second,
                             likes = emptyList(),
-                            owner = getLoggedUserUid(),
                             download_link = pair.first.toString()
                         )
-                        val db = FirebaseFirestore.getInstance().collection("posts")
-                        db.document("${post.owner}_${post.date}").set(post)
+                        val db = FirebaseFirestore.getInstance().collection("users")
+                        val postList = user!!.posts!!.toMutableList()
+                        postList.removeIf { it.date == post.date }
+                        postList.add(post)
+
+                        val updatedUser = User(user!!.name, user!!.nickname, user!!.description, postList)
+
+                        db.document(getLoggedUserUid()).set(updatedUser)
                             .addOnSuccessListener {
                                 Log.i("Post", "Nuevo post subido correctamente")
                             }
@@ -237,22 +243,6 @@ class DBM {
             } else Log.e("User", "Error en la sesión")
         }
 
-        /*
-        TODO
-
-        fun getUserPosts(uid: String): Flow<List<Post>> = flow {
-
-            val db = Firebase.storage.reference.child("users/${uid}/posts")
-            val gameList = mutableListOf<Game>()
-
-            db.collection("Games").get().await().forEach{
-                gameList.add(Game(it.id,it.getString("Nombre").toString(),it.getString("Imagen").toString(),it.getString("AVGDuracion").toString(),it.getString("Descripcion").toString(),it.getString("Developers").toString(),it.getString("Generos").toString(), it.getString("ReleaseDate").toString()))
-            }
-
-            emit(gameList)
-        }
-        */
-
         suspend fun getPFP(uid: String): String = suspendCoroutine { c ->
             val pfp = Firebase.storage.reference.child("users/${uid}/pfp.png")
             if (Firebase.auth.uid != null) {
@@ -285,11 +275,10 @@ class DBM {
             } else Log.e("User", "Error en la sesión")
         }
 
-        fun getUserData(): Flow<User> = callbackFlow {
+        fun getUserData(userUid: String): Flow<User> = callbackFlow {
             val db = FirebaseFirestore.getInstance()
-            val userId = FirebaseAuth.getInstance().currentUser?.uid
             var user = User()
-            db.collection("users").document(userId!!).get().addOnSuccessListener {
+            db.collection("users").document(userUid).get().addOnSuccessListener {
                 Log.i("User", "Obtenido información")
                 val data = it.toObject(User::class.java)
                 if (data != null) user = data
@@ -313,7 +302,7 @@ class DBM {
 
         fun getLoggedUserUid(): String {
             try {
-                return FirebaseAuth.getInstance().currentUser!!.uid
+                return FirebaseAuth.getInstance().currentUser?.uid ?:""
             } catch (e: java.lang.NullPointerException) {
                 throw Exception("Se ha intentado recuperar el uid cuando no hay sesión")
             }

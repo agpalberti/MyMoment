@@ -172,9 +172,9 @@ fun ProfileScreen(
                             iconId = R.drawable.logout,
                             contentDescription = stringResource(id = R.string.logout)
                         ) {
-                            viewModel.logOut()
                             navController.navigate(Destinations.RegisterScreen.ruta) {
                                 popUpTo(Destinations.HomeScreen.ruta) { inclusive = true }
+                                viewModel.logOut()
                             }
 
                         }

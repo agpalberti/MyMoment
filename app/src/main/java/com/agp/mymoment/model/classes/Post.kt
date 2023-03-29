@@ -8,13 +8,11 @@ import com.google.firebase.firestore.PropertyName
 data class Post(
     @get: PropertyName("date") @set: PropertyName("date") var date: String? = null,
     @get:PropertyName("likes") @set:PropertyName("likes") var likes: List<String>? = null,
-    @get:PropertyName("owner") @set:PropertyName("owner") var owner: String? = null,
     @get:PropertyName("download_link") @set:PropertyName("download_link") var download_link: String? = null
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.createStringArrayList(),
-        parcel.readString(),
         parcel.readString()
     ) {
     }
@@ -22,7 +20,6 @@ data class Post(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(date)
         parcel.writeList(likes)
-        parcel.writeString(owner)
         parcel.writeString(download_link)
     }
 

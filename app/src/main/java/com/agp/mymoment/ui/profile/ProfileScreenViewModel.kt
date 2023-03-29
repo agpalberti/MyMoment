@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.compose.saveable
 import com.agp.mymoment.R
 import com.agp.mymoment.config.MyPreferences
 import com.agp.mymoment.model.DBM
+import com.agp.mymoment.model.classes.Post
 import com.agp.mymoment.model.classes.User
 import com.agp.mymoment.model.utilities.bitmapToPNG
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,7 +33,6 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
     var userData by savedStateHandle.saveable { mutableStateOf(User()) }
     var onEditMode by savedStateHandle.saveable{ mutableStateOf(false) }
     var bitmap by savedStateHandle.saveable { mutableStateOf<Bitmap>(Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888)) }
-
     var editingName by savedStateHandle.saveable { mutableStateOf("") }
     var editingBio by savedStateHandle.saveable { mutableStateOf("") }
 
@@ -63,10 +63,9 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
 
     fun updateUserData(uid:String){
         viewModelScope.launch {
-            DBM.getUserData().collect {
+            DBM.getUserData(uid).collect {
                 userData = it
                 updateImages(uid)
-
             }
 
         }
@@ -84,7 +83,6 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
 
     private suspend fun updateImages(uid: String) {
         this.pfp = DBM.getPFP(uid)
-
         this.banner = DBM.getBanner(uid)
 
     }
