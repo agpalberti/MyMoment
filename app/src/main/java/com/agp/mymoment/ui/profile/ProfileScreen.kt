@@ -19,6 +19,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -77,9 +80,23 @@ fun ProfileScreen(
         //endregion navBar
         {
 
-            LazyColumn {
-                item{
+            LazyVerticalGrid(modifier = Modifier.fillMaxSize(), columns = GridCells.Fixed(3), contentPadding = PaddingValues(0.dp)) {
+                item(span = { GridItemSpan(3) }) {
                     ProfileScreenBody(navController, userUID = userUID)
+                }
+                items(viewModel.userData.posts?.size?:0){item ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().offset(y = (-80).dp),
+                        Arrangement.Center
+                    ) {
+                        ImageContainer(
+                            image = viewModel.userData.posts!![item].download_link ?: "",
+                            contentDescription = "Image $item",
+                            modifier = Modifier
+                                .size(130.dp)
+                                .padding(2.dp)
+                        )
+                    }
                 }
             }
 
@@ -199,12 +216,14 @@ fun ProfileScreenBody(
     var bannerImageUri by remember {
         mutableStateOf<Uri?>(null)
     }
-    val bannerBitmap =  remember {
+    val bannerBitmap = remember {
         mutableStateOf<Bitmap?>(null)
     }
 
-    val bannerLauncher = rememberLauncherForActivityResult(contract =
-    ActivityResultContracts.GetContent()) { uri: Uri? ->
+    val bannerLauncher = rememberLauncherForActivityResult(
+        contract =
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
         bannerImageUri = uri
     }
 
@@ -212,12 +231,13 @@ fun ProfileScreenBody(
         mutableStateOf<Uri?>(null)
     }
 
-    val pfpBitmap = remember{
+    val pfpBitmap = remember {
         mutableStateOf<Bitmap?>(null)
     }
 
     val pfpLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()){ uri: Uri? ->
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
         pfpImageUri = uri
     }
 
@@ -292,10 +312,8 @@ fun ProfileScreenBody(
 
 
         Column(
-
             Modifier
                 .fillMaxSize()
-
                 .offset(y = (-80).dp)
         ) {
 
@@ -318,7 +336,7 @@ fun ProfileScreenBody(
                             .background(MaterialTheme.colors.background)
                     )
 
-                    if (pfpImageUri == null){
+                    if (pfpImageUri == null) {
                         Image(
                             painter = rememberAsyncImagePainter(viewModel.pfp),
                             contentDescription = stringResource(id = R.string.pfp),
@@ -381,7 +399,10 @@ fun ProfileScreenBody(
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.primary
                         )
-                        Text(text = stringResource(id = R.string.followers), style = MaterialTheme.typography.body1)
+                        Text(
+                            text = stringResource(id = R.string.followers),
+                            style = MaterialTheme.typography.body1
+                        )
                     }
                     //endregion
 
@@ -403,7 +424,10 @@ fun ProfileScreenBody(
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.primary
                         )
-                        Text(text = stringResource(id = R.string.following), style = MaterialTheme.typography.body1)
+                        Text(
+                            text = stringResource(id = R.string.following),
+                            style = MaterialTheme.typography.body1
+                        )
                     }
                     //endregion
                 }
@@ -430,10 +454,14 @@ fun ProfileScreenBody(
                     Column {
                         Spacer(modifier = Modifier.size(10.dp))
 
-                        OutlinedTextField(value = viewModel.editingName, onValueChange = {viewModel.editingName = it})
+                        OutlinedTextField(
+                            value = viewModel.editingName,
+                            onValueChange = { viewModel.editingName = it })
                         Spacer(modifier = Modifier.size(10.dp))
 
-                        OutlinedTextField(value = viewModel.editingBio, onValueChange = {viewModel.editingBio = it})
+                        OutlinedTextField(
+                            value = viewModel.editingBio,
+                            onValueChange = { viewModel.editingBio = it })
                         Spacer(modifier = Modifier.size(10.dp))
                     }
 
@@ -458,8 +486,14 @@ fun ProfileScreenBody(
                     } else {
                         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                             OutlinedButton(onClick = {
-                                if(pfpImageUri != null) viewModel.uploadNewPfp(pfpBitmap.value!!, context)
-                                if(bannerImageUri != null) viewModel.uploadNewBanner(bannerBitmap.value!!, context)
+                                if (pfpImageUri != null) viewModel.uploadNewPfp(
+                                    pfpBitmap.value!!,
+                                    context
+                                )
+                                if (bannerImageUri != null) viewModel.uploadNewBanner(
+                                    bannerBitmap.value!!,
+                                    context
+                                )
                                 viewModel.uploadUserData()
                                 viewModel.updateUserData(viewModel.getActualUserUid())
                                 viewModel.switchEditMode()
@@ -489,50 +523,6 @@ fun ProfileScreenBody(
                 )
             }
 
-            Row(Modifier.background(Color.Red).height(500.dp)) {
-                Text("ASDF")
-            }
-
-            Row(Modifier.background(Color.Yellow).height(500.dp)) {
-                Text("ASDF")
-
-            }
-
-            Row(Modifier.background(Color.Red).height(500.dp)) {
-                Text("ASDF")
-            }
-
-            Row(Modifier.background(Color.Yellow).height(500.dp)) {
-                Text("ASDF")
-
-            }
-
-            Row(Modifier.background(Color.Red).height(500.dp)) {
-                Text("ASDF")
-            }
-
-            Row(Modifier.background(Color.Yellow).height(500.dp)) {
-                Text("ASDF")
-
-            }
-
-            Row(Modifier.background(Color.Red).height(500.dp)) {
-                Text("ASDF")
-            }
-
-            Row(Modifier.background(Color.Yellow).height(500.dp)) {
-                Text("ASDF")
-
-            }
-
-            Row(Modifier.background(Color.Red).height(500.dp)) {
-                Text("ASDF")
-            }
-
-            Row(Modifier.background(Color.Yellow).height(500.dp)) {
-                Text("ASDF")
-
-            }
         }
 
     }
@@ -540,3 +530,16 @@ fun ProfileScreenBody(
 }
 
 
+@Composable
+fun ImageContainer(image: String, contentDescription: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(image),
+            contentDescription = contentDescription,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+    }
+}
