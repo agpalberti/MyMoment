@@ -2,7 +2,6 @@ package com.agp.mymoment.ui.profile
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -12,13 +11,10 @@ import androidx.lifecycle.viewmodel.compose.saveable
 import com.agp.mymoment.R
 import com.agp.mymoment.config.MyPreferences
 import com.agp.mymoment.model.DBM
-import com.agp.mymoment.model.classes.Post
 import com.agp.mymoment.model.classes.User
 import com.agp.mymoment.model.utilities.bitmapToPNG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 import javax.inject.Inject
 
 @OptIn(SavedStateHandleSaveableApi::class)
@@ -73,7 +69,7 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
     }
 
     fun uploadUserData(){
-        DBM.uploadUserData(editingName, userData.nickname!!, editingBio)
+        DBM.uploadUserData(editingName, userData.nickname!!, editingBio, userData.posts?: emptyList())
     }
     fun resetEditFields(){
         editingName = userData.name?:""

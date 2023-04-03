@@ -287,10 +287,10 @@ class DBM {
             awaitClose { channel.close() }
         }
 
-        fun uploadUserData(name: String, nickname: String, description: String) {
+        fun uploadUserData(name: String, nickname: String, description: String, posts: List<Post>) {
             val user = FirebaseAuth.getInstance().currentUser
             val db = FirebaseFirestore.getInstance()
-            val userMap = User(name, nickname, description)
+            val userMap = User(name, nickname, description, posts)
             db.collection("users")
                 .document(user?.uid!!)
                 .set(userMap).addOnSuccessListener {

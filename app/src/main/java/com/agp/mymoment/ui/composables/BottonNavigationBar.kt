@@ -37,30 +37,26 @@ fun BottomNavigationBar(navController: NavController) {
                 },
                 selectedContentColor = MaterialTheme.colors.primary,
                 unselectedContentColor = MaterialTheme.colors.secondary,
-                selected = currentRoute == item.ruta,
-                onClick =  {
-                    if (item.ruta != Destinations.ProfileScreen.ruta){
-                        navController.navigate(item.ruta) {
+                selected =
+                if (item.ruta != Destinations.ProfileScreen.ruta)
+                    currentRoute == item.ruta
+                else
+                    currentRoute == "ProfileScreen/{uid}",
+                onClick = {
+                    navController.navigate(
+                        if (item.ruta != Destinations.ProfileScreen.ruta)
+                            item.ruta
+                        else
+                            "${item.ruta}/${DBM.getLoggedUserUid()}"
+                    ) {
 
-                            navController.graph.startDestinationRoute?.let { screen_route ->
-                                popUpTo(screen_route) {
-                                    saveState = true
-                                }
+                        navController.graph.startDestinationRoute?.let { screen_route ->
+                            popUpTo(screen_route) {
+                                saveState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
-                    } else{
-                        navController.navigate("${Destinations.ProfileScreen.ruta}/${DBM.getLoggedUserUid()}") {
-
-                            navController.graph.startDestinationRoute?.let { screen_route ->
-                                popUpTo(screen_route) {
-                                    saveState = true
-                                }
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
                 }
             )
