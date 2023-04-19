@@ -6,6 +6,8 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun ThemedTextField(
@@ -13,13 +15,14 @@ fun ThemedTextField(
     onValueChange: (String) -> Unit,
     labelText: String,
     keyBoardOptions: KeyboardOptions,
-    isError:Boolean = false
+    isError:Boolean = false,
+    fontSize: TextUnit = TextUnit.Unspecified,
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         singleLine = true,
-        placeholder = { Text(text = labelText) },
+        placeholder = { Text(text = labelText, fontSize = fontSize) },
         keyboardOptions = keyBoardOptions,
         modifier = Modifier.fillMaxWidth(),
         isError = isError

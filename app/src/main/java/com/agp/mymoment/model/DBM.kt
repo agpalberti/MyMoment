@@ -13,6 +13,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.tasks.await
+import okhttp3.internal.wait
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import java.io.File
@@ -107,6 +109,8 @@ class DBM {
                                     nickname,
                                     MyPreferences.resources?.getString(com.agp.mymoment.R.string.default_desc)
                                         ?: "",
+                                    emptyList(),
+                                    emptyList(),
                                     emptyList()
                                 )
                                 db.collection("users")
@@ -185,7 +189,7 @@ class DBM {
 
         suspend fun uploadNewPost(image: File) {
             if (Firebase.auth.currentUser != null) {
-                var user:User?
+                var user: User?
                 user = getUserData(getLoggedUserUid()).first()
                 uploadImage(image)
                     .addOnSuccessListener { pair ->
@@ -199,7 +203,14 @@ class DBM {
                         postList.removeIf { it.date == post.date }
                         postList.add(post)
 
-                        val updatedUser = User(user!!.name, user!!.nickname, user!!.description, postList)
+                        val updatedUser = User(
+                            user!!.name,
+                            user!!.nickname,
+                            user!!.description,
+                            postList,
+                            user!!.follows,
+                            user!!.followers
+                        )
 
                         db.document(getLoggedUserUid()).set(updatedUser)
                             .addOnSuccessListener {
@@ -287,10 +298,60 @@ class DBM {
             awaitClose { channel.close() }
         }
 
-        fun uploadUserData(name: String, nickname: String, description: String, posts: List<Post>) {
+        /*
+        fun getRandomUserData(): Flow<User> = flow {
+            val db = FirebaseFirestore.getInstance()
+            var user = User()
+
+
+            db.collection("users").get().addOnSuccessListener {
+                Log.i("User", "Obtenido información")
+                val randomIndex = (0 until it.documents.size).random()
+                val data: User? = it.documents[randomIndex].toObject(User::class.java)
+                if (data?.posts != null) user = data
+
+                Log.i("Buscar", "${data ?: "null"}")
+                trySend(user)
+            }
+            awaitClose { channel.close() }
+        }
+*/
+        fun getAllExplorePosts():Flow<List<Post>> = flow {
+            val list = mutableListOf<Post>()
+
+            getAllUsers().collect(){users ->
+                users.forEach {user ->
+                    user.posts?.forEach {
+                        if(it.download_link != null){
+                            list.add(it)
+                        }
+                    }
+                }
+            }
+            emit(list)
+        }
+
+        fun getAllUsers(): Flow<List<User>> = flow {
+            val db = FirebaseFirestore.getInstance()
+            val list = mutableListOf<User>()
+            db.collection("users").get().await().forEach{
+                if(it.id != getLoggedUserUid()) list.add(getUserData(it.id).first())
+            }
+            emit(list)
+        }
+
+        fun uploadUserData(
+            name: String,
+            nickname: String,
+            description: String,
+            posts: List<Post>,
+            follows: List<String>,
+            followers: List<String>
+        ) {
             val user = FirebaseAuth.getInstance().currentUser
             val db = FirebaseFirestore.getInstance()
-            val userMap = User(name, nickname, description, posts)
+            val userMap =
+                User(name, nickname, description, posts, follows = follows, followers = followers)
             db.collection("users")
                 .document(user?.uid!!)
                 .set(userMap).addOnSuccessListener {
@@ -300,12 +361,71 @@ class DBM {
                 }
         }
 
+        suspend fun followUser(uid: String) {
+            val user = getUserData(getLoggedUserUid()).first()
+            val db = FirebaseFirestore.getInstance()
+
+            val follows: MutableSet<String>? = user.follows?.toMutableSet()
+            follows?.add(uid)
+
+            val updatedUser = User(
+                user!!.name,
+                user!!.nickname,
+                user!!.description,
+                user.posts,
+                follows?.toList(),
+                user!!.followers
+            )
+
+            db.collection("users")
+                .document(getLoggedUserUid())
+                .set(updatedUser).addOnSuccessListener {
+                    Log.i("User", "Actualizado correctamente")
+                }.addOnSuccessListener {
+                    Log.e("User", "No se pudo actualizar")
+                }
+
+        }
+
+        suspend fun unfollowUser(uid: String) {
+            val user = getUserData(getLoggedUserUid()).first()
+            val db = FirebaseFirestore.getInstance()
+
+            val follows: MutableSet<String>? = user.follows?.toMutableSet()
+            follows?.removeIf { it == uid }
+
+            val updatedUser = User(
+                user!!.name,
+                user!!.nickname,
+                user!!.description,
+                user.posts,
+                follows?.toList(),
+                user!!.followers
+            )
+
+            db.collection("users")
+                .document(getLoggedUserUid())
+                .set(updatedUser).addOnSuccessListener {
+                    Log.i("User", "Actualizado correctamente")
+                }.addOnSuccessListener {
+                    Log.e("User", "No se pudo actualizar")
+                }
+
+        }
+
+        suspend fun isFollowing(userUid: String, uid: String): Boolean {
+            val user = getUserData(userUid).first()
+            return user.follows?.any { it == uid } ?: false
+        }
+
         fun getLoggedUserUid(): String {
             try {
-                return FirebaseAuth.getInstance().currentUser?.uid ?:""
+                return FirebaseAuth.getInstance().currentUser?.uid ?: ""
             } catch (e: java.lang.NullPointerException) {
                 throw Exception("Se ha intentado recuperar el uid cuando no hay sesión")
             }
         }
+
+
     }
 }

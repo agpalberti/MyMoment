@@ -47,4 +47,6 @@
     <string name="gallery_permission">Conceda los permisos necesarios para acceder a la galería.</string>
     <string name="no_gallery">Tu dispositivo no tiene galería</string>
     <string name="use_camera">Usar cámara</string>
+    <string name="unfollow">Dejar de seguir</string>
+    <string name="search">Buscar</string>
 </resources>

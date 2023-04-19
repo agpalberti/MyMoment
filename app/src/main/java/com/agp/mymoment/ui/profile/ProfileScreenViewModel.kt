@@ -27,17 +27,28 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
     var enableThemeMenu by savedStateHandle.saveable { mutableStateOf(false) }
     var theme by savedStateHandle.saveable { mutableStateOf(MyPreferences.resources!!.getString(R.string.auto_theme)) }
     var userData by savedStateHandle.saveable { mutableStateOf(User()) }
-    var onEditMode by savedStateHandle.saveable{ mutableStateOf(false) }
-    var bitmap by savedStateHandle.saveable { mutableStateOf<Bitmap>(Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888)) }
+    var onEditMode by savedStateHandle.saveable { mutableStateOf(false) }
+    var bitmap by savedStateHandle.saveable {
+        mutableStateOf<Bitmap>(
+            Bitmap.createBitmap(
+                200,
+                200,
+                Bitmap.Config.ARGB_8888
+            )
+        )
+    }
     var editingName by savedStateHandle.saveable { mutableStateOf("") }
     var editingBio by savedStateHandle.saveable { mutableStateOf("") }
+    var isUserFollowing by savedStateHandle.saveable {
+        mutableStateOf(false)
+    }
 
     fun turnSidebarMenu() {
         enableSettingsMenu = !enableSettingsMenu
     }
 
-    fun switchEditMode(){
-        onEditMode = ! onEditMode
+    fun switchEditMode() {
+        onEditMode = !onEditMode
     }
 
     fun logOut() {
@@ -57,24 +68,50 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
         theme = MyPreferences.resources!!.getString(R.string.dark_theme)
     }
 
-    fun updateUserData(uid:String){
+    fun getUserData(uid: String) {
         viewModelScope.launch {
             DBM.getUserData(uid).collect {
                 userData = it
                 updateImages(uid)
+                updateIsFollowing(uid)
             }
 
         }
         resetEditFields()
     }
 
-    fun uploadUserData(){
-        DBM.uploadUserData(editingName, userData.nickname!!, editingBio, userData.posts?: emptyList())
+    fun uploadUserData() {
+        DBM.uploadUserData(
+            editingName,
+            userData.nickname!!,
+            editingBio,
+            userData.posts ?: emptyList(),
+            userData.follows ?: emptyList(),
+            userData.followers ?: emptyList()
+        )
     }
-    fun resetEditFields(){
-        editingName = userData.name?:""
-        editingBio = userData.description?:""
+
+    private suspend fun updateIsFollowing(uid: String){
+        this.isUserFollowing = DBM.isFollowing(DBM.getLoggedUserUid(), uid)
     }
+
+    fun follow(uid: String){
+        viewModelScope.launch {
+        DBM.followUser(uid)
+        }
+    }
+
+    fun unfollow(uid: String) {
+        viewModelScope.launch {
+            DBM.unfollowUser(uid)
+        }
+    }
+
+    fun resetEditFields() {
+        editingName = userData.name ?: ""
+        editingBio = userData.description ?: ""
+    }
+
     fun getActualUserUid() = DBM.getLoggedUserUid()
 
     private suspend fun updateImages(uid: String) {
@@ -83,18 +120,19 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
 
     }
 
-    fun uploadNewPfp(bitmap: Bitmap, context: Context){
+    fun uploadNewPfp(bitmap: Bitmap, context: Context) {
         val pfp = bitmapToPNG(bitmap, context)
         if (pfp != null) {
             DBM.uploadNewPfp(pfp)
         }
     }
 
-    fun uploadNewBanner(bitmap: Bitmap, context: Context){
+    fun uploadNewBanner(bitmap: Bitmap, context: Context) {
         val banner = bitmapToPNG(bitmap, context)
         if (banner != null) {
             DBM.uploadNewBanner(banner)
         }
     }
+
 }
 

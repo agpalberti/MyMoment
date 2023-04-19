@@ -255,7 +255,6 @@ fun CameraCapture(
                                         frontCamera = !frontCamera
                                         CameraSelector.DEFAULT_BACK_CAMERA
                                     }
-
                                 delay(1000)
                                 onClickEnable = true
                             }

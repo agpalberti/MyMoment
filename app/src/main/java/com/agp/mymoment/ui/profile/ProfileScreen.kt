@@ -18,7 +18,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,7 +27,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -42,7 +40,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.agp.mymoment.R
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.composables.*
-import java.io.File
 
 @Composable
 fun ProfileScreen(
@@ -51,9 +48,9 @@ fun ProfileScreen(
     userUID: String
 ) {
 
-    viewModel.updateUserData(userUID)
+    viewModel.getUserData(userUID)
 
-    Box() {
+    Box {
 
         //region navBar
         ThemedNavBar(navController = navController, topBarContent = {
@@ -80,13 +77,19 @@ fun ProfileScreen(
         //endregion navBar
         {
 
-            LazyVerticalGrid(modifier = Modifier.fillMaxSize(), columns = GridCells.Fixed(3), contentPadding = PaddingValues(0.dp)) {
+            LazyVerticalGrid(
+                modifier = Modifier.fillMaxSize(),
+                columns = GridCells.Fixed(3),
+                contentPadding = PaddingValues(0.dp)
+            ) {
                 item(span = { GridItemSpan(3) }) {
                     ProfileScreenBody(navController, userUID = userUID)
                 }
-                items(viewModel.userData.posts?.size?:0){item ->
+                items(viewModel.userData.posts?.size ?: 0) { item ->
                     Row(
-                        modifier = Modifier.fillMaxWidth().offset(y = (-80).dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .offset(y = (-80).dp),
                         Arrangement.Center
                     ) {
                         ImageContainer(
@@ -131,7 +134,7 @@ fun ProfileScreen(
 
                         //TODO implementar
                         //region Botón para cambiar de tema
-                        /*
+
                     Row() {
                         Box() {
                             TextIconButton(
@@ -181,7 +184,7 @@ fun ProfileScreen(
 
                         }
                     }
-                    */
+
                         //endregion
 
                         TextIconButton(
@@ -479,8 +482,14 @@ fun ProfileScreenBody(
                                 Text(text = stringResource(id = R.string.edit_profile))
                             }
                         } else {
-                            OutlinedButton(onClick = { /*todo*/ }) {
-                                Text(text = stringResource(id = R.string.follow))
+                            if (!viewModel.isUserFollowing) {
+                                OutlinedButton(onClick = { viewModel.follow(userUID) }) {
+                                    Text(text = stringResource(id = R.string.follow))
+                                }
+                            } else {
+                                OutlinedButton(onClick = { viewModel.unfollow(userUID) }) {
+                                    Text(text = stringResource(id = R.string.unfollow))
+                                }
                             }
                         }
                     } else {
@@ -495,7 +504,7 @@ fun ProfileScreenBody(
                                     context
                                 )
                                 viewModel.uploadUserData()
-                                viewModel.updateUserData(viewModel.getActualUserUid())
+                                viewModel.getUserData(viewModel.getActualUserUid())
                                 viewModel.switchEditMode()
                             }) {
                                 Text(text = stringResource(id = R.string.save_changes))
@@ -527,19 +536,4 @@ fun ProfileScreenBody(
 
     }
 
-}
-
-
-@Composable
-fun ImageContainer(image: String, contentDescription: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-    ) {
-        Image(
-            painter = rememberAsyncImagePainter(image),
-            contentDescription = contentDescription,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-    }
 }
