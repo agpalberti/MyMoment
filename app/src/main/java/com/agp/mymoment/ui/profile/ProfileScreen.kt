@@ -38,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.agp.mymoment.R
+import com.agp.mymoment.config.MyPreferences
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.composables.*
 
@@ -49,6 +50,13 @@ fun ProfileScreen(
 ) {
 
     viewModel.getUserData(userUID)
+    val context = LocalContext.current
+
+    when(MyPreferences(context).accessTheme.collectAsState(initial = null).value){
+        "true" ->  viewModel.setThemeToDark()
+        "false" -> viewModel.setThemeToLight()
+        else -> viewModel.setThemeToAuto()
+    }
 
     Box {
 
@@ -161,15 +169,16 @@ fun ProfileScreen(
                                 text = stringResource(id = R.string.dark_theme),
                                 iconId = R.drawable.dark_mode
                             ) {
-                                viewModel.setThemeToDark()
+                                viewModel.setTheme(true,context)
                                 viewModel.enableThemeMenu = false
+
                             }
 
                             DropdownThemeItem(
                                 text = stringResource(id = R.string.light_theme),
                                 iconId = R.drawable.light_mode
                             ) {
-                                viewModel.setThemeToLight()
+                                viewModel.setTheme(false,context)
                                 viewModel.enableThemeMenu = false
                             }
 
@@ -177,7 +186,7 @@ fun ProfileScreen(
                                 text = stringResource(id = R.string.auto_theme),
                                 iconId = R.drawable.auto_mode
                             ) {
-                                viewModel.setThemeToAuto()
+                                viewModel.setTheme(null,context)
                                 viewModel.enableThemeMenu = false
 
                             }

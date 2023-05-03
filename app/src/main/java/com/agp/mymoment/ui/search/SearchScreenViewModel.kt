@@ -31,7 +31,7 @@ class SearchScreenViewModel @Inject constructor(savedStateHandle: SavedStateHand
         viewModelScope.launch {
             DBM.getAllExplorePosts().collect(){
                 Log.i("Buscar", "$it")
-               posts = it
+                posts = it
             } }
     }
 

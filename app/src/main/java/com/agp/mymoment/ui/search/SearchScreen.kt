@@ -46,7 +46,7 @@ fun SearchScreen(
     }) {
 
 
-        if (viewModel.searchText.isBlank()){
+        if (viewModel.searchText.isNotBlank()){
             ExploreScreenBody(navController)
         }
         else{
@@ -64,6 +64,14 @@ fun ExploreScreenBody(
     viewModel: SearchScreenViewModel = hiltViewModel()
 ) {
 
+
+}
+@Composable
+@Preview
+fun SearchScreenBody(
+    navController: NavHostController? = null,
+    viewModel: SearchScreenViewModel = hiltViewModel()
+){
     viewModel.updateScreen()
 
     Log.i("Buscar", "${viewModel.posts}")
@@ -73,10 +81,6 @@ fun ExploreScreenBody(
         columns = GridCells.Fixed(3),
         contentPadding = PaddingValues(0.dp)
     ) {
-        item(span = { GridItemSpan(3) }){
-            ExploreScreenBody(navController)
-        }
-
         items(viewModel.posts.size){
                 item ->
             Row(
@@ -94,13 +98,4 @@ fun ExploreScreenBody(
             }
         }
     }
-
-}
-@Composable
-@Preview
-fun SearchScreenBody(
-    navController: NavHostController? = null,
-    viewModel: SearchScreenViewModel = hiltViewModel()
-){
-
 }

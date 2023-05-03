@@ -5,8 +5,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import com.agp.mymoment.config.MyPreferences
 
 private val DarkColorPalette = darkColors(
     primary = primaryDark,
@@ -39,6 +42,7 @@ private val LightColorPalette = lightColors(
 
 @Composable
 fun MyMomentTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {

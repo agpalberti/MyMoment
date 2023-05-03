@@ -1,14 +1,18 @@
 package com.agp.mymoment.ui.profile
 
 import android.content.Context
+import android.content.res.Resources.Theme
 import android.graphics.Bitmap
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import com.agp.mymoment.R
+import com.agp.mymoment.config.MyPreferences
 import com.agp.mymoment.config.MyResources
 import com.agp.mymoment.model.DBM
 import com.agp.mymoment.model.classes.User
@@ -43,6 +47,8 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
         mutableStateOf(false)
     }
 
+
+
     fun turnSidebarMenu() {
         enableSettingsMenu = !enableSettingsMenu
     }
@@ -55,16 +61,28 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
         DBM.onLogOut()
     }
 
-    fun setThemeToLight() {
+    fun setTheme(darkTheme: Boolean?, context: Context){
+        val myPreferences = MyPreferences(context)
+        viewModelScope.launch {
+            myPreferences.saveThemeSetting(darkTheme)
+        }
+
+        when(darkTheme){
+            true -> setThemeToDark()
+            false -> setThemeToLight()
+            null -> setThemeToAuto()
+        }
+    }
+     fun setThemeToLight() {
         theme = MyResources.resources!!.getString(R.string.light_theme)
     }
 
-    fun setThemeToAuto() {
+     fun setThemeToAuto() {
         theme = MyResources.resources!!.getString(R.string.auto_theme)
 
     }
 
-    fun setThemeToDark() {
+     fun setThemeToDark() {
         theme = MyResources.resources!!.getString(R.string.dark_theme)
     }
 
