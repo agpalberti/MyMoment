@@ -6,9 +6,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -18,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.agp.mymoment.R
+import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.composables.ImageContainer
 import com.agp.mymoment.ui.composables.ThemedNavBar
 import com.agp.mymoment.ui.composables.ThemedTextField
@@ -46,52 +45,62 @@ fun SearchScreen(
 
     }) {
 
-        viewModel.updateScreen()
 
-        Log.i("Buscar", "${viewModel.posts}")
-
-        LazyVerticalGrid(
-            modifier = Modifier.fillMaxSize(),
-            columns = GridCells.Fixed(3),
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            item(span = { GridItemSpan(3) }){
-                SearchScreenBody(navController)
-            }
-
-            items(viewModel.posts.size){
-                item ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    Arrangement.Center
-                ){
-                    ImageContainer(
-                        image = viewModel.posts[item].download_link ?: "",
-                        contentDescription = "Image $item",
-                        modifier = Modifier
-                            .size(130.dp)
-                            .padding(2.dp)
-                    )
-                }
-            }
+        if (viewModel.searchText.isBlank()){
+            ExploreScreenBody(navController)
         }
+        else{
+            SearchScreenBody(navController)
+        }
+
     }
 
 }
 
 @Composable
 @Preview
-fun SearchScreenBody(
+fun ExploreScreenBody(
     navController: NavHostController? = null,
     viewModel: SearchScreenViewModel = hiltViewModel()
 ) {
 
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    viewModel.updateScreen()
+
+    Log.i("Buscar", "${viewModel.posts}")
+
+    LazyVerticalGrid(
+        modifier = Modifier.fillMaxSize(),
+        columns = GridCells.Fixed(3),
+        contentPadding = PaddingValues(0.dp)
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
+        item(span = { GridItemSpan(3) }){
+            ExploreScreenBody(navController)
+        }
+
+        items(viewModel.posts.size){
+                item ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                Arrangement.Center
+            ){
+                ImageContainer(
+                    image = viewModel.posts[item].download_link ?: "",
+                    contentDescription = "Image $item",
+                    modifier = Modifier
+                        .size(130.dp)
+                        .padding(2.dp)
+                )
+            }
+        }
     }
+
+}
+@Composable
+@Preview
+fun SearchScreenBody(
+    navController: NavHostController? = null,
+    viewModel: SearchScreenViewModel = hiltViewModel()
+){
 
 }

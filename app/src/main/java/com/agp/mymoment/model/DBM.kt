@@ -2,7 +2,7 @@ package com.agp.mymoment.model
 
 import android.net.Uri
 import android.util.Log
-import com.agp.mymoment.config.MyPreferences
+import com.agp.mymoment.config.MyResources
 import com.agp.mymoment.model.classes.Post
 import com.agp.mymoment.model.classes.User
 import com.google.android.gms.tasks.Task
@@ -14,7 +14,6 @@ import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.tasks.await
-import okhttp3.internal.wait
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import java.io.File
@@ -107,7 +106,7 @@ class DBM {
                                 val userMap = User(
                                     name,
                                     nickname,
-                                    MyPreferences.resources?.getString(com.agp.mymoment.R.string.default_desc)
+                                    MyResources.resources?.getString(com.agp.mymoment.R.string.default_desc)
                                         ?: "",
                                     emptyList(),
                                     emptyList(),

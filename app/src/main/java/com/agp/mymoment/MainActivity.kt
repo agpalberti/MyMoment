@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.agp.mymoment.config.GetDeviceConfig
-import com.agp.mymoment.config.MyPreferences
+import com.agp.mymoment.config.MyResources
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.navigation.NavigationHost
 import com.agp.mymoment.ui.theme.MyMomentTheme
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        MyPreferences.resources = this.resources
+        MyResources.resources = this.resources
 
         setContent {
             MyMomentTheme() { Start() }

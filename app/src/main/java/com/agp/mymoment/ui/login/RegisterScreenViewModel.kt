@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import com.agp.mymoment.R
-import com.agp.mymoment.config.MyPreferences
+import com.agp.mymoment.config.MyResources
 import com.agp.mymoment.model.DBM
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.*
@@ -82,31 +82,31 @@ class RegisterScreenViewModel @Inject constructor(savedStateHandle: SavedStateHa
     private fun parseErrorCode(errorCode: Int?) {
         when (errorCode) {
             1 -> {
-                emailError = MyPreferences.resources?.getString(R.string.emailInUseError)!!
+                emailError = MyResources.resources?.getString(R.string.emailInUseError)!!
             }//Email en uso
             2 -> {
-                passwordError = MyPreferences.resources?.getString(R.string.passwordTooShortError)!!
+                passwordError = MyResources.resources?.getString(R.string.passwordTooShortError)!!
             }//La contraseña debe contener 6 carácteres de largo como mínimo
             3 -> {
-                emailError = MyPreferences.resources?.getString(R.string.emptyEmailError)!!
+                emailError = MyResources.resources?.getString(R.string.emptyEmailError)!!
             }//Email vacío
             4 -> {
-                passwordError = MyPreferences.resources?.getString(R.string.emptyPasswordError)!!
+                passwordError = MyResources.resources?.getString(R.string.emptyPasswordError)!!
             }//Contraseña vacía
             5 -> {
-                nameError = MyPreferences.resources?.getString(R.string.emptyNameError)!!
+                nameError = MyResources.resources?.getString(R.string.emptyNameError)!!
             }//El nombre no puede estar vacío
             6 -> {
-                nicknameError = MyPreferences.resources?.getString(R.string.emptyNicknameError)!!
+                nicknameError = MyResources.resources?.getString(R.string.emptyNicknameError)!!
             }//El nombre de usuario no puede estar vacío
             7 -> {
-                passwordError = MyPreferences.resources?.getString(R.string.invalidPasswordError)!!
+                passwordError = MyResources.resources?.getString(R.string.invalidPasswordError)!!
             }//Contraseña incorrecta
             8 -> {
-                emailError = MyPreferences.resources?.getString(R.string.invalidUserError)!!
+                emailError = MyResources.resources?.getString(R.string.invalidUserError)!!
             }//Usuario inexistente
             9 -> {
-                emailError = MyPreferences.resources?.getString(R.string.invalidEmailFormatError)!!
+                emailError = MyResources.resources?.getString(R.string.invalidEmailFormatError)!!
             }
             else -> {}
         }

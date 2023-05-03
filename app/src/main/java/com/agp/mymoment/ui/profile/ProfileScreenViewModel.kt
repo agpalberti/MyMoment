@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import com.agp.mymoment.R
-import com.agp.mymoment.config.MyPreferences
+import com.agp.mymoment.config.MyResources
 import com.agp.mymoment.model.DBM
 import com.agp.mymoment.model.classes.User
 import com.agp.mymoment.model.utilities.bitmapToPNG
@@ -25,7 +25,7 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
     var banner by savedStateHandle.saveable { mutableStateOf("") }
     var enableSettingsMenu by savedStateHandle.saveable { mutableStateOf(false) }
     var enableThemeMenu by savedStateHandle.saveable { mutableStateOf(false) }
-    var theme by savedStateHandle.saveable { mutableStateOf(MyPreferences.resources!!.getString(R.string.auto_theme)) }
+    var theme by savedStateHandle.saveable { mutableStateOf(MyResources.resources!!.getString(R.string.auto_theme)) }
     var userData by savedStateHandle.saveable { mutableStateOf(User()) }
     var onEditMode by savedStateHandle.saveable { mutableStateOf(false) }
     var bitmap by savedStateHandle.saveable {
@@ -56,16 +56,16 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
     }
 
     fun setThemeToLight() {
-        theme = MyPreferences.resources!!.getString(R.string.light_theme)
+        theme = MyResources.resources!!.getString(R.string.light_theme)
     }
 
     fun setThemeToAuto() {
-        theme = MyPreferences.resources!!.getString(R.string.auto_theme)
+        theme = MyResources.resources!!.getString(R.string.auto_theme)
 
     }
 
     fun setThemeToDark() {
-        theme = MyPreferences.resources!!.getString(R.string.dark_theme)
+        theme = MyResources.resources!!.getString(R.string.dark_theme)
     }
 
     fun getUserData(uid: String) {
