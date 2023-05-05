@@ -18,6 +18,7 @@ class RegisterScreenViewModel @Inject constructor(savedStateHandle: SavedStateHa
     ViewModel() {
 
 
+
     var email by savedStateHandle.saveable { mutableStateOf("") }
 
     var emailError by savedStateHandle.saveable() { mutableStateOf("") }
@@ -32,6 +33,10 @@ class RegisterScreenViewModel @Inject constructor(savedStateHandle: SavedStateHa
 
     var password by savedStateHandle.saveable { mutableStateOf("") }
 
+    var passwordConfirmation by savedStateHandle.saveable { mutableStateOf("") }
+
+    var passwordConfirmationVisible by savedStateHandle.saveable{mutableStateOf(false)}
+
     var passwordError by savedStateHandle.saveable { mutableStateOf("") }
 
     var passwordVisible by savedStateHandle.saveable { mutableStateOf(false) }
@@ -41,6 +46,8 @@ class RegisterScreenViewModel @Inject constructor(savedStateHandle: SavedStateHa
     }
 
     fun register(callback: (Boolean) -> Unit) {
+
+        if (passwordConfirmation == password){
         DBM.onRegister(
             email.trim().lowercase(Locale.ROOT),
             password,
@@ -52,6 +59,11 @@ class RegisterScreenViewModel @Inject constructor(savedStateHandle: SavedStateHa
                 parseErrorCode(errorCode)
                 callback(false)
             }
+
+        }
+        } else{
+            parseErrorCode(10)
+            callback(false)
         }
     }
 
@@ -108,6 +120,7 @@ class RegisterScreenViewModel @Inject constructor(savedStateHandle: SavedStateHa
             9 -> {
                 emailError = MyResources.resources?.getString(R.string.invalidEmailFormatError)!!
             }
+            10 -> passwordError = MyResources.resources?.getString(R.string.passwordConfirmationError)!!
             else -> {}
         }
     }

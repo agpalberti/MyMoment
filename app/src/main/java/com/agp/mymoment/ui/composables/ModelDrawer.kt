@@ -73,7 +73,7 @@ fun SideBar(
                     ) {
                         switchSettings()
                     } else {
-                        //Si no, vuelve a su posiciÃ³n
+                        //Si no, vuelve a su posicion
                         offsetX = 0f
                         returningDefault = true
 

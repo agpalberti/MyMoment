@@ -49,4 +49,6 @@
     <string name="use_camera">Usar cámara</string>
     <string name="unfollow">Dejar de seguir</string>
     <string name="search">Buscar</string>
+    <string name="passwordConfirmationError">Las contraseñas no coinciden</string>
+    <string name="confirmPassword">Confirmar contraseña</string>
 </resources>

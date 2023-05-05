@@ -288,6 +288,7 @@ class DBM {
         fun getUserData(userUid: String): Flow<User> = callbackFlow {
             val db = FirebaseFirestore.getInstance()
             var user = User()
+            Log.i("GetUser", "User Uid: $userUid")
             db.collection("users").document(userUid).get().addOnSuccessListener {
                 Log.i("User", "Obtenido información")
                 val data = it.toObject(User::class.java)
@@ -319,7 +320,7 @@ class DBM {
             val list = mutableListOf<Post>()
 
             getAllUsers().collect(){users ->
-                users.forEach {user ->
+                users.values.forEach {user ->
                     user.posts?.forEach {
                         if(it.download_link != null){
                             list.add(it)
@@ -330,13 +331,13 @@ class DBM {
             emit(list)
         }
 
-        fun getAllUsers(): Flow<List<User>> = flow {
+        fun getAllUsers(): Flow<Map<String,User>> = flow {
             val db = FirebaseFirestore.getInstance()
-            val list = mutableListOf<User>()
+            val map = mutableMapOf<String,User>()
             db.collection("users").get().await().forEach{
-                if(it.id != getLoggedUserUid()) list.add(getUserData(it.id).first())
+                if(it.id != getLoggedUserUid()) map[it.id] = (getUserData(it.id).first())
             }
-            emit(list)
+            emit(map)
         }
 
         fun uploadUserData(
@@ -413,6 +414,7 @@ class DBM {
         }
 
         suspend fun isFollowing(userUid: String, uid: String): Boolean {
+            Log.i("Following", "User: " + userUid)
             val user = getUserData(userUid).first()
             return user.follows?.any { it == uid } ?: false
         }
@@ -424,6 +426,18 @@ class DBM {
                 throw Exception("Se ha intentado recuperar el uid cuando no hay sesión")
             }
         }
+
+        /*
+        suspend fun getUserUid(user: User): String? {
+            val firestore = FirebaseFirestore.getInstance()
+            val collection = firestore.collection("users")
+            val query = collection.whereEqualTo("nickname", user.nickname).limit(1)
+            val snapshot = query.get().await()
+            val uid = snapshot.documents.firstOrNull()?.id
+
+            Log.i("GetUser", user.nickname + ": $uid")
+            return uid
+        }*/
 
 
     }

@@ -140,9 +140,6 @@ fun ProfileScreen(
                             .padding(20.dp), verticalArrangement = Arrangement.SpaceEvenly
                     ) {
 
-                        //TODO implementar
-                        //region Botón para cambiar de tema
-
                     Row() {
                         Box() {
                             TextIconButton(

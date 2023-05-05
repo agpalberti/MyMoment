@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Start() {
-    SystemBarColor(color = MaterialTheme.colors.background)
+    SystemBarColor(backgroundColor = MaterialTheme.colors.background)
     // A surface container using the 'background' color from the theme
     Surface(
         modifier = Modifier.fillMaxSize(),

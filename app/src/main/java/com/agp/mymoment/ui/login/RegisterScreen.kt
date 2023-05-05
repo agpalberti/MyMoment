@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -31,7 +32,8 @@ import com.agp.mymoment.ui.theme.getLogoId
 
 @Composable
 fun RegisterScreen(navController: NavHostController){
-    RegisterScreenBody(navController)
+    LazyColumn(Modifier.fillMaxSize()){
+    item { RegisterScreenBody(navController)}}
 }
 
 @Composable
@@ -84,13 +86,43 @@ fun RegisterScreenBody(
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 val image = if (viewModel.passwordVisible)
-                    R.drawable.visibility
-                else R.drawable.visibility_off
+                    R.drawable.visibility_off
+                else R.drawable.visibility
                 val descripcion =
                     if (viewModel.passwordVisible) stringResource(id = R.string.hide_password) else stringResource(
                         id = R.string.show_password
                     )
                 IconButton(onClick = { viewModel.passwordVisible = !viewModel.passwordVisible }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = image),
+                        descripcion,
+                        modifier = Modifier.size(25.dp)
+                    )
+                }
+            }
+        )
+    }
+
+    @Composable
+    fun PasswordConfirmationTextField() {
+        OutlinedTextField(
+            value = viewModel.passwordConfirmation,
+            onValueChange = { viewModel.passwordConfirmation = it },
+            isError = viewModel.passwordError.isNotEmpty(),
+            singleLine = true,
+            placeholder = { Text(stringResource(id = R.string.confirmPassword)) },
+            visualTransformation = if (viewModel.passwordConfirmationVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier.fillMaxWidth(),
+            trailingIcon = {
+                val image = if (viewModel.passwordConfirmationVisible)
+                    R.drawable.visibility_off
+                else R.drawable.visibility
+                val descripcion =
+                    if (viewModel.passwordConfirmationVisible) stringResource(id = R.string.hide_password) else stringResource(
+                        id = R.string.show_password
+                    )
+                IconButton(onClick = { viewModel.passwordConfirmationVisible = !viewModel.passwordConfirmationVisible }) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = image),
                         descripcion,
@@ -131,6 +163,7 @@ fun RegisterScreenBody(
         }
 
         Row {
+
             Image(painterResource(id = getLogoId()), "Logo")
         }
         //endregion
@@ -204,6 +237,10 @@ fun RegisterScreenBody(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     PasswordTextField()
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    PasswordConfirmationTextField()
 
                     ErrorTooltip()
 

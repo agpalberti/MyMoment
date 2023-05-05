@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.agp.mymoment.R
 import com.agp.mymoment.config.MyPreferences
 import com.agp.mymoment.ui.composables.ThemedNavBar
@@ -26,17 +27,7 @@ import com.agp.mymoment.ui.theme.getLogoId
 fun HomeScreen(navController: NavHostController) {
     ThemedNavBar(navController = navController, topBarContent = {
 
-        val context = LocalContext.current
-        val myPreferences = MyPreferences(context)
-        val theme = myPreferences.accessTheme.collectAsState(initial = null)
-
-        val darkTheme = when (theme.value) {
-            "true" -> true
-            "false" -> false
-            else -> null
-        }
-
-        Image(painter = painterResource(getLogoId(darkTheme?: isSystemInDarkTheme())), contentDescription = "logo")
+        Image(painter = painterResource(getLogoId()), contentDescription = "logo")
 
     }) {
         HomeScreenBody(navController)
@@ -55,6 +46,6 @@ fun HomeScreenBody(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Home")
+        Text(text = "a")
     }
 }

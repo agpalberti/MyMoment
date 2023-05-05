@@ -14,31 +14,34 @@ import com.agp.mymoment.ui.search.SearchScreen
 import com.agp.mymoment.ui.upload.UploadScreen
 
 @Composable
-fun NavigationHost(navController: NavHostController, startDestination: String){
+fun NavigationHost(navController: NavHostController, startDestination: String) {
 
-    NavHost(navController = navController, startDestination = startDestination){
+    NavHost(navController = navController, startDestination = startDestination) {
 
-        composable(Destinations.RegisterScreen.ruta){
+        composable(Destinations.RegisterScreen.ruta) {
             RegisterScreen(navController)
         }
-        composable(Destinations.HomeScreen.ruta){
+        composable(Destinations.HomeScreen.ruta) {
             HomeScreen(navController = navController)
         }
 
-        composable(Destinations.NotificationScreen.ruta){
+        composable(Destinations.NotificationScreen.ruta) {
             NotificationScreen(navController = navController)
         }
 
-        composable(Destinations.SearchScreen.ruta){
+        composable(Destinations.SearchScreen.ruta) {
             SearchScreen(navController = navController)
         }
 
-        composable("${Destinations.ProfileScreen.ruta}/{uid}", arguments = listOf(navArgument("uid"){type = NavType.StringType})){ backStackEntry ->
+        composable(
+            "${Destinations.ProfileScreen.ruta}/{uid}",
+            arguments = listOf(navArgument("uid") { type = NavType.StringType })
+        ) { backStackEntry ->
             backStackEntry.arguments?.getString("uid")
                 ?.let { ProfileScreen(navController, userUID = it) }
         }
 
-        composable(Destinations.UploadScreen.ruta){
+        composable(Destinations.UploadScreen.ruta) {
             UploadScreen(navController)
         }
     }
