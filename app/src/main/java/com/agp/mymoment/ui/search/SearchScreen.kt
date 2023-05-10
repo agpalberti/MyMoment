@@ -99,7 +99,7 @@ fun SearchScreenBody(
                 "Result: " + keyList[item] + ":\n " + viewModel.users[keyList[item]] + "\n pfp: $pfp\n isHeFollowing: $following\n AmIFollowing: $followingUser"
             )
 
-            Row() {
+            Row(Modifier.fillMaxWidth().height(80.dp)) {
                 UserListView(
                     Modifier
                         .fillMaxWidth()
