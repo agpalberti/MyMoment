@@ -26,7 +26,7 @@ import kotlin.math.roundToInt
 
 
 @Composable
-fun SideBar(
+fun ModalDrawer(
     modifier: Modifier = Modifier,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,

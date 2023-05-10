@@ -108,6 +108,10 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:1.2.1"
     implementation "androidx.camera:camera-view:1.2.1"
 
+    //ViewPager
+
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
+
 }
 
 kapt {

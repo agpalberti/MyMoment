@@ -3,6 +3,7 @@ package com.agp.mymoment.ui.profile
 import android.content.Context
 import android.content.res.Resources.Theme
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
@@ -25,6 +26,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel() {
 
+    var isPopLaunched: Boolean = false
+    var item: Int = 0
+    var openImageView: Boolean by savedStateHandle.saveable { mutableStateOf(false) }
     var pfp by savedStateHandle.saveable { mutableStateOf("") }
     var banner by savedStateHandle.saveable { mutableStateOf("") }
     var enableSettingsMenu by savedStateHandle.saveable { mutableStateOf(false) }
@@ -48,7 +52,6 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
     }
 
 
-
     fun turnSidebarMenu() {
         enableSettingsMenu = !enableSettingsMenu
     }
@@ -61,28 +64,29 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
         DBM.onLogOut()
     }
 
-    fun setTheme(darkTheme: Boolean?, context: Context){
+    fun setTheme(darkTheme: Boolean?, context: Context) {
         val myPreferences = MyPreferences(context)
         viewModelScope.launch {
             myPreferences.saveThemeSetting(darkTheme)
         }
 
-        when(darkTheme){
+        when (darkTheme) {
             true -> setThemeToDark()
             false -> setThemeToLight()
             null -> setThemeToAuto()
         }
     }
-     fun setThemeToLight() {
+
+    fun setThemeToLight() {
         theme = MyResources.resources!!.getString(R.string.light_theme)
     }
 
-     fun setThemeToAuto() {
+    fun setThemeToAuto() {
         theme = MyResources.resources!!.getString(R.string.auto_theme)
 
     }
 
-     fun setThemeToDark() {
+    fun setThemeToDark() {
         theme = MyResources.resources!!.getString(R.string.dark_theme)
     }
 
@@ -92,6 +96,7 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
                 userData = it
                 updateImages(uid)
                 updateIsFollowing(uid)
+                Log.i("ProfileScreenViewModel", "getUserData: ${userData.followers}")
             }
 
         }
@@ -109,19 +114,25 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
         )
     }
 
-    private suspend fun updateIsFollowing(uid: String){
+    private suspend fun updateIsFollowing(uid: String) {
         this.isUserFollowing = DBM.isFollowing(DBM.getLoggedUserUid(), uid)
     }
 
-    fun follow(uid: String){
-        viewModelScope.launch {
-        DBM.followUser(uid)
+    fun follow(uid: String) {
+        if (!isUserFollowing) {
+            viewModelScope.launch {
+                DBM.followUser(uid)
+                isUserFollowing = true
+            }
         }
     }
 
     fun unfollow(uid: String) {
-        viewModelScope.launch {
-            DBM.unfollowUser(uid)
+        if (isUserFollowing) {
+            viewModelScope.launch {
+                DBM.unfollowUser(uid)
+                isUserFollowing = false
+            }
         }
     }
 

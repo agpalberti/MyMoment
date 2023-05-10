@@ -4,7 +4,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.google.firebase.firestore.PropertyName
 
-
 data class User(
     @get: PropertyName("name") @set: PropertyName("name") var name:String? = null,
     @get:PropertyName("nickname") @set:PropertyName("nickname") var nickname: String? = null,
@@ -21,8 +20,7 @@ data class User(
         parcel.createTypedArrayList(Post),
         parcel.createStringArrayList(),
         parcel.createStringArrayList()
-    ) {
-    }
+    )
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(name)
         parcel.writeString(nickname)

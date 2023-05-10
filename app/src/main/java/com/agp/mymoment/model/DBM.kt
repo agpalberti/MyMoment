@@ -356,65 +356,108 @@ class DBM {
                 .document(user?.uid!!)
                 .set(userMap).addOnSuccessListener {
                     Log.i("User", "Actualizado correctamente")
-                }.addOnSuccessListener {
+                }.addOnFailureListener {
                     Log.e("User", "No se pudo actualizar")
                 }
         }
 
         suspend fun followUser(uid: String) {
-            val user = getUserData(getLoggedUserUid()).first()
+            val me = getUserData(getLoggedUserUid()).first()
+            val user = getUserData(uid).first()
             val db = FirebaseFirestore.getInstance()
 
-            val follows: MutableSet<String>? = user.follows?.toMutableSet()
-            follows?.add(uid)
+
+            val followers: MutableSet<String>? = user.followers?.toMutableSet()
+            val myFollows: MutableSet<String>? = me.follows?.toMutableSet()
+            myFollows?.add(uid)
+            followers?.add(getLoggedUserUid())
+
+            val myUpdatedUser = User(
+                me!!.name,
+                me!!.nickname,
+                me!!.description,
+                me.posts,
+                myFollows?.toList(),
+                me!!.followers
+            )
 
             val updatedUser = User(
                 user!!.name,
                 user!!.nickname,
                 user!!.description,
                 user.posts,
-                follows?.toList(),
-                user!!.followers
+                user!!.follows,
+                followers?.toList()
             )
+
 
             db.collection("users")
                 .document(getLoggedUserUid())
+                .set(myUpdatedUser).addOnSuccessListener {
+                    Log.i("User", "Actualizado correctamente")
+                }.addOnFailureListener {
+                    Log.e("User", "No se pudo actualizar")
+                }
+
+            db.collection("users")
+                .document(uid)
                 .set(updatedUser).addOnSuccessListener {
                     Log.i("User", "Actualizado correctamente")
-                }.addOnSuccessListener {
+                }.addOnFailureListener {
                     Log.e("User", "No se pudo actualizar")
                 }
 
         }
 
         suspend fun unfollowUser(uid: String) {
-            val user = getUserData(getLoggedUserUid()).first()
+            val me = getUserData(getLoggedUserUid()).first()
+            val user = getUserData(uid).first()
             val db = FirebaseFirestore.getInstance()
 
-            val follows: MutableSet<String>? = user.follows?.toMutableSet()
-            follows?.removeIf { it == uid }
+
+            val followers: MutableSet<String>? = user.followers?.toMutableSet()
+            followers?.removeIf { it == getLoggedUserUid() }
+            val myFollows: MutableSet<String>? = me.follows?.toMutableSet()
+            myFollows?.removeIf { it == uid }
+
+            val myUpdatedUser = User(
+                me!!.name,
+                me!!.nickname,
+                me!!.description,
+                me.posts,
+                myFollows?.toList(),
+                me!!.followers
+            )
 
             val updatedUser = User(
                 user!!.name,
                 user!!.nickname,
                 user!!.description,
                 user.posts,
-                follows?.toList(),
-                user!!.followers
+                user!!.follows,
+                followers?.toList()
             )
 
             db.collection("users")
                 .document(getLoggedUserUid())
-                .set(updatedUser).addOnSuccessListener {
+                .set(myUpdatedUser).addOnSuccessListener {
                     Log.i("User", "Actualizado correctamente")
                 }.addOnSuccessListener {
+                    Log.e("User", "No se pudo actualizar")
+                }
+
+            db.collection("users")
+                .document(uid)
+                .set(updatedUser).addOnSuccessListener {
+                    Log.i("User", "Actualizado correctamente")
+                }.addOnFailureListener {
                     Log.e("User", "No se pudo actualizar")
                 }
 
         }
 
         suspend fun isFollowing(userUid: String, uid: String): Boolean {
-            Log.i("Following", "User: " + userUid)
+            Log.i("Following", "User: $userUid")
             val user = getUserData(userUid).first()
             return user.follows?.any { it == uid } ?: false
         }

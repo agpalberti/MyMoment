@@ -10,6 +10,7 @@ import com.agp.mymoment.ui.login.RegisterScreen
 import com.agp.mymoment.ui.home.HomeScreen
 import com.agp.mymoment.ui.notifications.NotificationScreen
 import com.agp.mymoment.ui.profile.ProfileScreen
+import com.agp.mymoment.ui.profile.followers.FollowersScreen
 import com.agp.mymoment.ui.search.SearchScreen
 import com.agp.mymoment.ui.upload.UploadScreen
 
@@ -40,6 +41,15 @@ fun NavigationHost(navController: NavHostController, startDestination: String) {
             backStackEntry.arguments?.getString("uid")
                 ?.let { ProfileScreen(navController, userUID = it) }
         }
+
+        composable(
+            "${Destinations.FollowersScreen.ruta}/{uid}",
+            arguments = listOf(navArgument("uid") { type = NavType.StringType })
+        ) { backStackEntry ->
+            backStackEntry.arguments?.getString("uid")
+                ?.let { FollowersScreen(navController, userUID = it) }
+        }
+
 
         composable(Destinations.UploadScreen.ruta) {
             UploadScreen(navController)

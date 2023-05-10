@@ -106,7 +106,26 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .size(130.dp)
                                 .padding(2.dp)
-                        )
+                        ){
+                            viewModel.openImageView = true
+                            viewModel.item = item
+                        }
+
+                        if (viewModel.openImageView && !viewModel.isPopLaunched) {
+                            viewModel.isPopLaunched = true
+                            ImageView(
+                                url = viewModel.userData.posts!![viewModel.item].download_link ?: "",
+                                pfpUrl = viewModel.pfp,
+                                user = viewModel.userData,
+                                onUserClick = {
+                                    navController.navigate("${Destinations.ProfileScreen.ruta}/${userUID}")
+                                    viewModel.openImageView = false
+                                    viewModel.isPopLaunched = false
+                                }) {
+                                viewModel.openImageView = false
+                                viewModel.isPopLaunched = false
+                            }
+                        }
                     }
                 }
             }
@@ -129,7 +148,7 @@ fun ProfileScreen(
                 //Si estoy en esta pantalla cuando le doy al botón de atrás no quiero cambiar de pantalla
                 //Si no que este menú se vuelva a plegar
                 BackPressHandler(viewModel::turnSidebarMenu)
-                SideBar(
+                ModalDrawer(
                     modifier = Modifier.background(MaterialTheme.colors.background),
                     switchSettings = viewModel::turnSidebarMenu
                 ) {
@@ -140,56 +159,56 @@ fun ProfileScreen(
                             .padding(20.dp), verticalArrangement = Arrangement.SpaceEvenly
                     ) {
 
-                    Row() {
-                        Box() {
-                            TextIconButton(
-                                text = viewModel.theme,
-                                iconId = when (viewModel.theme) {
-                                    stringResource(id = R.string.dark_theme) -> R.drawable.dark_mode
-                                    stringResource(id = R.string.auto_theme) -> R.drawable.auto_mode
-                                    stringResource(id = R.string.light_theme) -> R.drawable.light_mode
-                                    else -> {
-                                        R.drawable.error
-                                    }
-                                },
-                                contentDescription = stringResource(id = R.string.theme)
-                            ) {
-                                viewModel.enableThemeMenu = true
+                        Row() {
+                            Box() {
+                                TextIconButton(
+                                    text = viewModel.theme,
+                                    iconId = when (viewModel.theme) {
+                                        stringResource(id = R.string.dark_theme) -> R.drawable.dark_mode
+                                        stringResource(id = R.string.auto_theme) -> R.drawable.auto_mode
+                                        stringResource(id = R.string.light_theme) -> R.drawable.light_mode
+                                        else -> {
+                                            R.drawable.error
+                                        }
+                                    },
+                                    contentDescription = stringResource(id = R.string.theme)
+                                ) {
+                                    viewModel.enableThemeMenu = true
+                                }
+                            }
+
+                            DropdownMenu(
+                                expanded = viewModel.enableThemeMenu,
+                                onDismissRequest = { viewModel.enableThemeMenu = false }) {
+
+                                DropdownThemeItem(
+                                    text = stringResource(id = R.string.dark_theme),
+                                    iconId = R.drawable.dark_mode
+                                ) {
+                                    viewModel.setTheme(true,context)
+                                    viewModel.enableThemeMenu = false
+
+                                }
+
+                                DropdownThemeItem(
+                                    text = stringResource(id = R.string.light_theme),
+                                    iconId = R.drawable.light_mode
+                                ) {
+                                    viewModel.setTheme(false,context)
+                                    viewModel.enableThemeMenu = false
+                                }
+
+                                DropdownThemeItem(
+                                    text = stringResource(id = R.string.auto_theme),
+                                    iconId = R.drawable.auto_mode
+                                ) {
+                                    viewModel.setTheme(null,context)
+                                    viewModel.enableThemeMenu = false
+
+                                }
+
                             }
                         }
-
-                        DropdownMenu(
-                            expanded = viewModel.enableThemeMenu,
-                            onDismissRequest = { viewModel.enableThemeMenu = false }) {
-
-                            DropdownThemeItem(
-                                text = stringResource(id = R.string.dark_theme),
-                                iconId = R.drawable.dark_mode
-                            ) {
-                                viewModel.setTheme(true,context)
-                                viewModel.enableThemeMenu = false
-
-                            }
-
-                            DropdownThemeItem(
-                                text = stringResource(id = R.string.light_theme),
-                                iconId = R.drawable.light_mode
-                            ) {
-                                viewModel.setTheme(false,context)
-                                viewModel.enableThemeMenu = false
-                            }
-
-                            DropdownThemeItem(
-                                text = stringResource(id = R.string.auto_theme),
-                                iconId = R.drawable.auto_mode
-                            ) {
-                                viewModel.setTheme(null,context)
-                                viewModel.enableThemeMenu = false
-
-                            }
-
-                        }
-                    }
 
                         //endregion
 
@@ -391,6 +410,8 @@ fun ProfileScreenBody(
                         .padding(start = 20.dp)
                         .offset(y = (85).dp)
                 ) {
+
+                    //todo update en tiempo real
                     //region Seguidores
                     Column(
                         Modifier
@@ -399,12 +420,13 @@ fun ProfileScreenBody(
                             .clickable(
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }) {
-                                //todo
+
+                                navController!!.navigate("${Destinations.FollowersScreen.ruta}/$userUID")
                             }, Arrangement.Bottom, Alignment.CenterHorizontally
                     ) {
 
                         Text(
-                            text = "0",
+                            text = "${viewModel.userData.followers?.size?: ""}",
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.primary
                         )
@@ -423,13 +445,13 @@ fun ProfileScreenBody(
                             .clickable(
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }) {
-                                //todo
+
                             },
                         Arrangement.Bottom,
                         Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "0",
+                            text = "${viewModel.userData.follows?.size?: ""}",
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.primary
                         )
@@ -489,11 +511,15 @@ fun ProfileScreenBody(
                             }
                         } else {
                             if (!viewModel.isUserFollowing) {
-                                OutlinedButton(onClick = { viewModel.follow(userUID) }) {
+                                OutlinedButton(onClick = {
+                                    viewModel.follow(userUID)
+                                }) {
                                     Text(text = stringResource(id = R.string.follow))
                                 }
                             } else {
-                                OutlinedButton(onClick = { viewModel.unfollow(userUID) }) {
+                                OutlinedButton(onClick = {
+                                    viewModel.unfollow(userUID)
+                                }) {
                                     Text(text = stringResource(id = R.string.unfollow))
                                 }
                             }
@@ -518,6 +544,7 @@ fun ProfileScreenBody(
                             Spacer(modifier = Modifier.size(10.dp))
                             OutlinedButton(onClick = {
                                 bannerImageUri = null
+                                pfpImageUri = null
                                 viewModel.resetEditFields()
                                 viewModel.switchEditMode()
                             }) {
