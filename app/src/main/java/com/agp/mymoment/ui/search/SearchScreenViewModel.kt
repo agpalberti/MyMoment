@@ -13,6 +13,7 @@ import com.agp.mymoment.model.DBM
 import com.agp.mymoment.model.classes.Post
 import com.agp.mymoment.model.classes.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -29,6 +30,12 @@ class SearchScreenViewModel @Inject constructor(savedStateHandle: SavedStateHand
     var posts:List<Post> by savedStateHandle.saveable { mutableStateOf(mutableListOf()) }
     var users:Map<String,User> by savedStateHandle.saveable { mutableStateOf(mutableMapOf()) }
     var isPopLaunched = false
+
+
+    fun resetImageView(){
+            openImageView = false
+            isPopLaunched = false
+    }
 
     fun updateScreen(){
         updatePosts(); updateUsers()

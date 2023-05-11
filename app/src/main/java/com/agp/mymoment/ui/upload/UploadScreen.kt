@@ -75,7 +75,7 @@ fun UploadScreenBody(
             IconButton(
                 modifier = Modifier.align(Alignment.TopEnd),
                 onClick = {
-                    //TODO
+                    //TODO para que no se pueda hacer insert infinitos
                     bitmap.value?.let { viewModel.uploadNewPost(it,context) }
                     viewModel.imageUri = viewModel.emptyImageUri
                     bitmap.value = null

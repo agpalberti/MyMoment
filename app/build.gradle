@@ -112,6 +112,9 @@ dependencies {
 
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
 
+    //Pager https://developer.android.com/jetpack/androidx/releases/paging?hl=es-419
+
+
 }
 
 kapt {

@@ -1,32 +1,31 @@
 package com.agp.mymoment.ui.profile.followers
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.TabRow
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.viewpager2.widget.ViewPager2
 import com.agp.mymoment.model.classes.User
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.composables.ThemedNavBar
 import com.agp.mymoment.ui.composables.UserListView
 import com.agp.mymoment.ui.profile.ProfileScreenViewModel
 import com.agp.mymoment.ui.search.SearchScreenViewModel
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
 
 
 @Composable
 fun FollowersScreen(
     navController: NavController,
     userUID: String,
+    index: Int,
     viewModel: ProfileScreenViewModel = hiltViewModel()
 ) {
 
@@ -43,7 +42,7 @@ fun FollowersScreen(
 
     }) {
 
-        FollowersScreenBody(navController)
+        FollowersScreenBody(navController, index)
 
     }
 
@@ -51,23 +50,32 @@ fun FollowersScreen(
 
 
 @Composable
-fun FollowersScreenBody(navController: NavController, viewModel: ProfileScreenViewModel = hiltViewModel(),searchScreenViewModel: SearchScreenViewModel = hiltViewModel()) {
-
+fun FollowersScreenBody(
+    navController: NavController,
+    index: Int,
+    profileScreenViewModel: ProfileScreenViewModel = hiltViewModel(),
+    searchScreenViewModel: SearchScreenViewModel = hiltViewModel()
+) {
+    //todo implementar swipe
     @Composable
-    fun TabRowsContent(currentList:List<String>?, item:Int){
+    fun TabRowsContent(currentList: List<String>?, item: Int) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .height(80.dp)) {
+                .height(80.dp)
+        ) {
 
             val followingUser by searchScreenViewModel.amIFollowing(currentList!![item])
                 .collectAsState(initial = false)
-            val following by searchScreenViewModel.isHeFollowing(currentList!![item]).collectAsState(initial = false)
-            val pfp by searchScreenViewModel.getPfp(currentList!![item]).collectAsState(initial = "")
-            val user by searchScreenViewModel.getUser(currentList!![item]).collectAsState(initial = null)
+            val following by searchScreenViewModel.isHeFollowing(currentList!![item])
+                .collectAsState(initial = false)
+            val pfp by searchScreenViewModel.getPfp(currentList!![item])
+                .collectAsState(initial = "")
+            val user by searchScreenViewModel.getUser(currentList!![item])
+                .collectAsState(initial = null)
 
             UserListView(
-                modifier= Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp),
                 pfpUrl = pfp,
@@ -77,17 +85,22 @@ fun FollowersScreenBody(navController: NavController, viewModel: ProfileScreenVi
                 ),
                 followingUser = followingUser ?: false,
                 following = following ?: false,
-                onUserClick = {navController.navigate("${Destinations.ProfileScreen.ruta}/${currentList!![item]}")  }) {
+                onUserClick = { navController.navigate("${Destinations.ProfileScreen.ruta}/${currentList!![item]}") }) {
             }
         }
     }
 
 
     val tabs = listOf("Seguidores", "Seguidos")
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    var selectedTabIndex by remember { mutableStateOf(index) }
+    val currentList =
+        if (selectedTabIndex == 0) profileScreenViewModel.userData.followers else profileScreenViewModel.userData.follows
 
     Column(Modifier.fillMaxSize()) {
+
         TabRow(
+            modifier = Modifier
+                .fillMaxWidth(),
             selectedTabIndex = selectedTabIndex,
             backgroundColor = MaterialTheme.colors.background,
             indicator = { tabPositions ->
@@ -107,12 +120,11 @@ fun FollowersScreenBody(navController: NavController, viewModel: ProfileScreenVi
             }
         }
 
-        val currentList = if (selectedTabIndex == 0) viewModel.userData.followers else viewModel.userData.follows
-
         when (selectedTabIndex) {
             0 -> {
+
                 LazyColumn(Modifier.fillMaxSize()) {
-                    items(currentList?.size?:0) {item->
+                    items(currentList?.size ?: 0) { item ->
                         TabRowsContent(currentList = currentList, item = item)
                     }
                 }
@@ -121,8 +133,9 @@ fun FollowersScreenBody(navController: NavController, viewModel: ProfileScreenVi
                 LazyColumn(
                     Modifier
                         .fillMaxSize()
-                        .padding(vertical = 1.dp)) {
-                    items(currentList?.size?:0) { item ->
+                        .padding(vertical = 1.dp)
+                ) {
+                    items(currentList?.size ?: 0) { item ->
                         TabRowsContent(currentList = currentList, item = item)
                     }
                 }

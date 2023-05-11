@@ -1,4 +1,4 @@
-package com.agp.mymoment.ui.composables
+package com.agp.mymoment.ui.image
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -17,31 +14,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.navigation.NavHostController
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.agp.mymoment.R
-import com.agp.mymoment.model.classes.User
-import com.agp.mymoment.navigation.Destinations
+import com.agp.mymoment.ui.composables.DropdownThemeItem
 
 
 @Composable
 fun ImageView(
     url: String,
     pfpUrl: String?,
-    user: User,
-    onUserClick:() -> Unit,
+    userUid: String,
+    viewModel: ImageViewModel = hiltViewModel(),
+    onUserClick: () -> Unit,
+    onDeleteRequest:() -> Unit,
     onDismissRequest: () -> Unit
 ) {
-
 
     val interactionSource = remember {
         MutableInteractionSource()
     }
 
+    viewModel.updatePostInfo(url, userUid)
 
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -67,14 +64,14 @@ fun ImageView(
                                 indication = null,
                                 interactionSource = interactionSource,
                                 onClick = onUserClick
-                            )
-                    , verticalAlignment = Alignment.CenterVertically) {
+                            ), verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(35.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colors.background),
-                        ){
+                        ) {
                             AsyncImage(
                                 modifier = Modifier
                                     .matchParentSize()
@@ -85,24 +82,12 @@ fun ImageView(
                             )
                         }
 
-                        Spacer(modifier =Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
 
-                        Text(text = user.nickname ?: "")
+                        Text(text = viewModel.user.nickname ?: "")
                     }
 
                 }
-
-
-
-                /*
-                UserListView(
-                    pfpUrl = pfpUrl,
-                    user = user,
-                    followingUser = followingUser,
-                    following = following,
-                    onUserClick = { /*TODO*/ }) {
-                }
-                 */
 
                 Box(Modifier.weight(0.76f)) {
                     //la imagen
@@ -117,13 +102,68 @@ fun ImageView(
                 Box(Modifier.weight(0.12f), contentAlignment = Alignment.Center) {
 
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                        Icon(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.favorite), contentDescription = "Like")
-                        Icon(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.comment), contentDescription = "Comment")
-                        Text(text = "Share")
-                        Text(text = "Save")
-                    }
+
+                        IconButton(
+                            onClick = {
+                                if (viewModel.isLiked) viewModel.dislike(userUid)
+                                else viewModel.like(userUid)
+                            }) {
+                            Icon(
+                                modifier = Modifier.size(30.dp),
+                                painter =
+                                if (viewModel.isLiked) painterResource(id = R.drawable.dislike)
+                                else painterResource(id = R.drawable.like),
+                                contentDescription = "Like"
+                            )
+                        }
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(
+                                modifier = Modifier.size(30.dp),
+                                painter = painterResource(id = R.drawable.comment),
+                                contentDescription = "Comment"
+                            )
+                        }
+
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(
+                                modifier = Modifier.size(30.dp),
+                                painter = painterResource(id = R.drawable.save),
+                                contentDescription = "Save"
+                            )
+                        }
+
+
+
+                        IconButton(onClick = { viewModel.enableOptions = true }) {
+                            Icon(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.more), contentDescription = "More")
+
+                        }
+
+
+                        }
 
                 }
+
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    DropdownMenu(
+                        expanded = viewModel.enableOptions,
+                        onDismissRequest = { viewModel.enableOptions = false }) {
+
+                        DropdownThemeItem(text = "Reportar", iconId = R.drawable.error) {
+
+                        }
+
+                        if (viewModel.getCurrentUserUid() == userUid) {
+                            DropdownThemeItem(text = "Eliminar", iconId = R.drawable.delete) {
+                                viewModel.deletePost()
+                                onDismissRequest()
+                                onDeleteRequest()
+                            }
+                        }
+                    }
+                }
+
+
             }
 
 

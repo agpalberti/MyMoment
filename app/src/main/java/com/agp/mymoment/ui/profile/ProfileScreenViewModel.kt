@@ -1,12 +1,9 @@
 package com.agp.mymoment.ui.profile
 
 import android.content.Context
-import android.content.res.Resources.Theme
 import android.graphics.Bitmap
 import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -51,6 +48,11 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
         mutableStateOf(false)
     }
 
+
+    fun resetImageView(){
+            openImageView = false
+            isPopLaunched = false
+    }
 
     fun turnSidebarMenu() {
         enableSettingsMenu = !enableSettingsMenu
@@ -141,7 +143,7 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
         editingBio = userData.description ?: ""
     }
 
-    fun getActualUserUid() = DBM.getLoggedUserUid()
+    fun getCurrentUserUid() = DBM.getLoggedUserUid()
 
     private suspend fun updateImages(uid: String) {
         this.pfp = DBM.getPFP(uid)

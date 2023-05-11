@@ -18,6 +18,7 @@ fun EditTextField(
     labelText: String,
     fontSize: TextUnit = TextUnit.Unspecified,
 ) {
+    //todo singleline? y maxCharacters
     BasicTextField(
         value = value,
         onValueChange = onValueChange,

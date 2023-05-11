@@ -26,6 +26,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -41,6 +42,7 @@ import com.agp.mymoment.R
 import com.agp.mymoment.config.MyPreferences
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.composables.*
+import com.agp.mymoment.ui.image.ImageView
 
 @Composable
 fun ProfileScreen(
@@ -49,6 +51,7 @@ fun ProfileScreen(
     userUID: String
 ) {
 
+    //todo actualizar borrado de imagenes en tiempo real
     viewModel.getUserData(userUID)
     val context = LocalContext.current
 
@@ -58,7 +61,16 @@ fun ProfileScreen(
         else -> viewModel.setThemeToAuto()
     }
 
-    Box {
+    if (viewModel.isPopLaunched && !viewModel.openImageView) viewModel.isPopLaunched = false
+
+    var blur = 0.dp
+    if (viewModel.openImageView) {
+        BackPressHandler(onBackPressed = {
+            viewModel.resetImageView()
+        })
+        blur = 10.dp
+    }
+    Box(modifier = Modifier.fillMaxSize().blur(blur, blur)) {
 
         //region navBar
         ThemedNavBar(navController = navController, topBarContent = {
@@ -70,7 +82,7 @@ fun ProfileScreen(
                 )
             }
             Row(Modifier.fillMaxWidth(), Arrangement.End) {
-                if (userUID == viewModel.getActualUserUid()) {
+                if (userUID == viewModel.getCurrentUserUid()) {
                     NoRippleIconButton(
                         painterResource(id = R.drawable.menu_open),
                         contentDescription = stringResource(id = R.string.open_menu),
@@ -93,7 +105,10 @@ fun ProfileScreen(
                 item(span = { GridItemSpan(3) }) {
                     ProfileScreenBody(navController, userUID = userUID)
                 }
-                items(viewModel.userData.posts?.size ?: 0) { item ->
+
+                val list = viewModel.userData.posts?.sortedBy { it.date }
+
+                items(list?.size ?: 0) { item ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -101,7 +116,7 @@ fun ProfileScreen(
                         Arrangement.Center
                     ) {
                         ImageContainer(
-                            image = viewModel.userData.posts!![item].download_link ?: "",
+                            image = list!![item].download_link ?: "",
                             contentDescription = "Image $item",
                             modifier = Modifier
                                 .size(130.dp)
@@ -114,16 +129,15 @@ fun ProfileScreen(
                         if (viewModel.openImageView && !viewModel.isPopLaunched) {
                             viewModel.isPopLaunched = true
                             ImageView(
-                                url = viewModel.userData.posts!![viewModel.item].download_link ?: "",
+                                url = list!![viewModel.item].download_link ?: "",
                                 pfpUrl = viewModel.pfp,
-                                user = viewModel.userData,
+                                userUid = userUID,
+                                onDeleteRequest = {viewModel.getUserData(userUID)},
                                 onUserClick = {
                                     navController.navigate("${Destinations.ProfileScreen.ruta}/${userUID}")
-                                    viewModel.openImageView = false
-                                    viewModel.isPopLaunched = false
+                                    viewModel.resetImageView()
                                 }) {
-                                viewModel.openImageView = false
-                                viewModel.isPopLaunched = false
+                                viewModel.resetImageView()
                             }
                         }
                     }
@@ -132,7 +146,7 @@ fun ProfileScreen(
 
         }
 
-        if (userUID == viewModel.getActualUserUid()) {
+        if (userUID == viewModel.getCurrentUserUid()) {
             //region Menu opciones
             AnimatedVisibility(
                 visible = viewModel.enableSettingsMenu, enter = slideInHorizontally(
@@ -290,6 +304,7 @@ fun ProfileScreenBody(
 
                     //region Banner
                     Box {
+                        //todo arreglar que el banner se vea bien en todos los dispositivos y rellene todo el tamaño
                         if (bannerImageUri == null) {
                             Image(
                                 painter = rememberAsyncImagePainter(viewModel.banner),
@@ -421,7 +436,7 @@ fun ProfileScreenBody(
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }) {
 
-                                navController!!.navigate("${Destinations.FollowersScreen.ruta}/$userUID")
+                                navController!!.navigate("${Destinations.FollowersScreen.ruta}/0/$userUID")
                             }, Arrangement.Bottom, Alignment.CenterHorizontally
                     ) {
 
@@ -445,7 +460,7 @@ fun ProfileScreenBody(
                             .clickable(
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }) {
-
+                                navController!!.navigate("${Destinations.FollowersScreen.ruta}/1/$userUID")
                             },
                         Arrangement.Bottom,
                         Alignment.CenterHorizontally
@@ -486,6 +501,7 @@ fun ProfileScreenBody(
                         Spacer(modifier = Modifier.size(10.dp))
 
                         OutlinedTextField(
+                            singleLine = true,
                             value = viewModel.editingName,
                             onValueChange = { viewModel.editingName = it })
                         Spacer(modifier = Modifier.size(10.dp))
@@ -505,7 +521,7 @@ fun ProfileScreenBody(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Column() {
                     if (!viewModel.onEditMode) {
-                        if (userUID == viewModel.getActualUserUid()) {
+                        if (userUID == viewModel.getCurrentUserUid()) {
                             OutlinedButton(onClick = { viewModel.switchEditMode() }) {
                                 Text(text = stringResource(id = R.string.edit_profile))
                             }
@@ -536,7 +552,7 @@ fun ProfileScreenBody(
                                     context
                                 )
                                 viewModel.uploadUserData()
-                                viewModel.getUserData(viewModel.getActualUserUid())
+                                viewModel.getUserData(viewModel.getCurrentUserUid())
                                 viewModel.switchEditMode()
                             }) {
                                 Text(text = stringResource(id = R.string.save_changes))

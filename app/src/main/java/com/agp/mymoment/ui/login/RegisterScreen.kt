@@ -210,6 +210,7 @@ fun RegisterScreenBody(
 
                     TextHeader(text = stringResource(id = R.string.registro))
 
+                    //todo enter para cambiar de textfield
                     Spacer(modifier = Modifier.height(20.dp))
 
                     EmailTextField()

@@ -23,6 +23,8 @@ fun BottomNavigationBar(navController: NavController) {
         Destinations.ProfileScreen
     )
 
+
+    //todo arreglar que se pueda volver al inicio de una pantalla en la que ya estas
     BottomAppBar(backgroundColor = MaterialTheme.colors.background, elevation = 0.dp) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route

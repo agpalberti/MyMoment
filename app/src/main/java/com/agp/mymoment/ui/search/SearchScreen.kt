@@ -20,19 +20,31 @@ import com.agp.mymoment.R
 import com.agp.mymoment.model.classes.User
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.composables.*
+import com.agp.mymoment.ui.image.ImageView
 
 @Composable
 fun SearchScreen(
     navController: NavHostController,
     viewModel: SearchScreenViewModel = hiltViewModel()
 ) {
-    viewModel.updateScreen()
+    LaunchedEffect(key1 = true){
+        viewModel.updateScreen()
+    }
+
+    if (viewModel.isPopLaunched && !viewModel.openImageView) viewModel.isPopLaunched = false
 
     var blur = 0.dp
-    if (viewModel.openImageView){
+    if (viewModel.openImageView) {
+        BackPressHandler(onBackPressed = {
+            viewModel.resetImageView()
+        })
         blur = 10.dp
     }
-    Column(Modifier.fillMaxSize().blur(blur,blur)) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .blur(blur, blur)
+    ) {
         ThemedNavBar(navController = navController, topBarContent = {
             Row(
                 Modifier
@@ -72,13 +84,9 @@ fun SearchScreenBody(
 ) {
     Log.i("Buscar", "${viewModel.users}")
 
-
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-
-
-
 
         val filteredMap = viewModel.users.filter {
             it.value.name?.contains(viewModel.searchText) == true || it.value.nickname?.contains(
@@ -99,7 +107,11 @@ fun SearchScreenBody(
                 "Result: " + keyList[item] + ":\n " + viewModel.users[keyList[item]] + "\n pfp: $pfp\n isHeFollowing: $following\n AmIFollowing: $followingUser"
             )
 
-            Row(Modifier.fillMaxWidth().height(80.dp)) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+            ) {
                 UserListView(
                     Modifier
                         .fillMaxWidth()
@@ -126,12 +138,13 @@ fun ExploreScreenBody(
 
     Log.i("Explore", "${viewModel.posts}")
 
-
+// todo arreglar que se vea la ultima fila que esta cortada por alguna razon
 
 
     LazyVerticalGrid(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxWidth()
+            .fillMaxHeight(0.925f),
         columns = GridCells.Fixed(3),
         contentPadding = PaddingValues(0.dp)
     ) {
@@ -161,19 +174,18 @@ fun ExploreScreenBody(
                     if (viewModel.openImageView && !viewModel.isPopLaunched) {
                         viewModel.isPopLaunched = true
                         Log.i("Popup", "User: ${viewModel.posts[viewModel.item]}")
-                            ImageView(
-                                url = viewModel.posts[viewModel.item].download_link ?: "",
-                                pfpUrl = pfp,
-                                user = user.values.first(),
-                                onUserClick = {
-                                    navController!!.navigate("${Destinations.ProfileScreen.ruta}/${user.keys.first()}")
-                                    viewModel.openImageView = false
-                                    viewModel.isPopLaunched = false
-                                }
-                            ) {
-                                viewModel.openImageView = false
-                                viewModel.isPopLaunched = false
+                        ImageView(
+                            url = viewModel.posts[viewModel.item].download_link ?: "",
+                            pfpUrl = pfp,
+                            userUid = user.keys.first(),
+                            onDeleteRequest = {viewModel.updateScreen()},
+                            onUserClick = {
+                                navController!!.navigate("${Destinations.ProfileScreen.ruta}/${user.keys.first()}")
+                                viewModel.resetImageView()
                             }
+                        ) {
+                            viewModel.resetImageView()
+                        }
 
                     }
                 }

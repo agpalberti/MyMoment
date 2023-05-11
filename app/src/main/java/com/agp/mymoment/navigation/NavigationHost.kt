@@ -43,11 +43,12 @@ fun NavigationHost(navController: NavHostController, startDestination: String) {
         }
 
         composable(
-            "${Destinations.FollowersScreen.ruta}/{uid}",
-            arguments = listOf(navArgument("uid") { type = NavType.StringType })
+            "${Destinations.FollowersScreen.ruta}/{index}/{uid}",
+            arguments = listOf(navArgument("uid") { type = NavType.StringType }, navArgument("index") { type = NavType.IntType })
         ) { backStackEntry ->
-            backStackEntry.arguments?.getString("uid")
-                ?.let { FollowersScreen(navController, userUID = it) }
+            val userUID = backStackEntry.arguments?.getString("uid")
+            val index = backStackEntry.arguments?.getInt("index")
+                ?.let { userUID?.let { it1 -> FollowersScreen(navController, userUID = it1, index =it ) } }
         }
 
 

@@ -2,6 +2,7 @@ package com.agp.mymoment.model
 
 import android.net.Uri
 import android.util.Log
+import android.util.Log.i
 import com.agp.mymoment.config.MyResources
 import com.agp.mymoment.model.classes.Post
 import com.agp.mymoment.model.classes.User
@@ -48,7 +49,7 @@ class DBM {
                         }
                         //Si no devuelve errores da un mensaje de éxito y pasa a la siguiente pantalla
                         .addOnSuccessListener {
-                            Log.i("Login", "Logeado correctamente")
+                            i("Login", "Logeado correctamente")
                             callback(0)
                         }
                 } else {
@@ -100,7 +101,7 @@ class DBM {
                         }
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                Log.i("Register", "Usuario creado correctamente")
+                                i("Register", "Usuario creado correctamente")
                                 val user = mAuth.currentUser
                                 val db = FirebaseFirestore.getInstance()
                                 val userMap = User(
@@ -116,7 +117,7 @@ class DBM {
                                     .document(user?.uid!!)
                                     .set(userMap)
                                     .addOnSuccessListener {
-                                        Log.i(
+                                        i(
                                             "Register",
                                             "Usuario creado exitosamente y datos almacenados en Firestore"
                                         )
@@ -176,7 +177,7 @@ class DBM {
                     Log.e("Camara", "Firebase: Error al subir nuevo post", task.exception)
                     task.exception?.let { throw it }
                 }
-                Log.i("Camara", "La foto se ha subido correctamente")
+                i("Camara", "La foto se ha subido correctamente")
                 ref.downloadUrl
             }.continueWith { task ->
                 if (!task.isSuccessful) {
@@ -198,22 +199,22 @@ class DBM {
                             download_link = pair.first.toString()
                         )
                         val db = FirebaseFirestore.getInstance().collection("users")
-                        val postList = user!!.posts!!.toMutableList()
+                        val postList = user.posts!!.toMutableList()
                         postList.removeIf { it.date == post.date }
                         postList.add(post)
 
                         val updatedUser = User(
-                            user!!.name,
-                            user!!.nickname,
-                            user!!.description,
+                            user.name,
+                            user.nickname,
+                            user.description,
                             postList,
-                            user!!.follows,
-                            user!!.followers
+                            user.follows,
+                            user.followers
                         )
 
                         db.document(getLoggedUserUid()).set(updatedUser)
                             .addOnSuccessListener {
-                                Log.i("Post", "Nuevo post subido correctamente")
+                                i("Post", "Nuevo post subido correctamente")
                             }
                             .addOnFailureListener { e ->
                                 Log.e("Post", "Error al subir nuevo post", e)
@@ -230,7 +231,7 @@ class DBM {
             if (Firebase.auth.uid != null) {
                 db.child("${Firebase.auth.uid}/pfp.png").putBytes(pfp.readBytes())
                     .addOnSuccessListener {
-                        Log.i("User", "La pfp se ha subido correctamente")
+                        i("User", "La pfp se ha subido correctamente")
                     }
                     .addOnFailureListener { e ->
                         Log.e("User", "Error al subir la foto de perfil", e)
@@ -244,7 +245,7 @@ class DBM {
             if (Firebase.auth.uid != null) {
                 db.child("${Firebase.auth.uid}/banner.png").putBytes(banner.readBytes())
                     .addOnSuccessListener {
-                        Log.i("User", "El banner se ha subido correctamente")
+                        i("User", "El banner se ha subido correctamente")
                     }
                     .addOnFailureListener { e ->
                         Log.e("User", "Error al subir el banner", e)
@@ -288,9 +289,9 @@ class DBM {
         fun getUserData(userUid: String): Flow<User> = callbackFlow {
             val db = FirebaseFirestore.getInstance()
             var user = User()
-            Log.i("GetUser", "User Uid: $userUid")
+            i("GetUser", "User Uid: $userUid")
             db.collection("users").document(userUid).get().addOnSuccessListener {
-                Log.i("User", "Obtenido información")
+                i("User", "Obtenido información")
                 val data = it.toObject(User::class.java)
                 if (data != null) user = data
                 trySend(user)
@@ -298,31 +299,13 @@ class DBM {
             awaitClose { channel.close() }
         }
 
-        /*
-        fun getRandomUserData(): Flow<User> = flow {
-            val db = FirebaseFirestore.getInstance()
-            var user = User()
-
-
-            db.collection("users").get().addOnSuccessListener {
-                Log.i("User", "Obtenido información")
-                val randomIndex = (0 until it.documents.size).random()
-                val data: User? = it.documents[randomIndex].toObject(User::class.java)
-                if (data?.posts != null) user = data
-
-                Log.i("Buscar", "${data ?: "null"}")
-                trySend(user)
-            }
-            awaitClose { channel.close() }
-        }
-*/
-        fun getAllExplorePosts():Flow<List<Post>> = flow {
+        fun getAllExplorePosts(): Flow<List<Post>> = flow {
             val list = mutableListOf<Post>()
 
-            getAllUsers().collect(){users ->
-                users.values.forEach {user ->
+            getAllUsers().collect { users ->
+                users.values.forEach { user ->
                     user.posts?.forEach {
-                        if(it.download_link != null){
+                        if (it.download_link != null) {
                             list.add(it)
                         }
                     }
@@ -331,11 +314,11 @@ class DBM {
             emit(list)
         }
 
-        fun getAllUsers(): Flow<Map<String,User>> = flow {
+        fun getAllUsers(): Flow<Map<String, User>> = flow {
             val db = FirebaseFirestore.getInstance()
-            val map = mutableMapOf<String,User>()
-            db.collection("users").get().await().forEach{
-                if(it.id != getLoggedUserUid()) map[it.id] = (getUserData(it.id).first())
+            val map = mutableMapOf<String, User>()
+            db.collection("users").get().await().forEach {
+                if (it.id != getLoggedUserUid()) map[it.id] = (getUserData(it.id).first())
             }
             emit(map)
         }
@@ -355,7 +338,7 @@ class DBM {
             db.collection("users")
                 .document(user?.uid!!)
                 .set(userMap).addOnSuccessListener {
-                    Log.i("User", "Actualizado correctamente")
+                    i("User", "Actualizado correctamente")
                 }.addOnFailureListener {
                     Log.e("User", "No se pudo actualizar")
                 }
@@ -373,20 +356,20 @@ class DBM {
             followers?.add(getLoggedUserUid())
 
             val myUpdatedUser = User(
-                me!!.name,
-                me!!.nickname,
-                me!!.description,
+                me.name,
+                me.nickname,
+                me.description,
                 me.posts,
                 myFollows?.toList(),
-                me!!.followers
+                me.followers
             )
 
             val updatedUser = User(
-                user!!.name,
-                user!!.nickname,
-                user!!.description,
+                user.name,
+                user.nickname,
+                user.description,
                 user.posts,
-                user!!.follows,
+                user.follows,
                 followers?.toList()
             )
 
@@ -394,7 +377,7 @@ class DBM {
             db.collection("users")
                 .document(getLoggedUserUid())
                 .set(myUpdatedUser).addOnSuccessListener {
-                    Log.i("User", "Actualizado correctamente")
+                    i("User", "Actualizado correctamente")
                 }.addOnFailureListener {
                     Log.e("User", "No se pudo actualizar")
                 }
@@ -402,7 +385,7 @@ class DBM {
             db.collection("users")
                 .document(uid)
                 .set(updatedUser).addOnSuccessListener {
-                    Log.i("User", "Actualizado correctamente")
+                    i("User", "Actualizado correctamente")
                 }.addOnFailureListener {
                     Log.e("User", "No se pudo actualizar")
                 }
@@ -421,27 +404,27 @@ class DBM {
             myFollows?.removeIf { it == uid }
 
             val myUpdatedUser = User(
-                me!!.name,
-                me!!.nickname,
-                me!!.description,
+                me.name,
+                me.nickname,
+                me.description,
                 me.posts,
                 myFollows?.toList(),
-                me!!.followers
+                me.followers
             )
 
             val updatedUser = User(
-                user!!.name,
-                user!!.nickname,
-                user!!.description,
+                user.name,
+                user.nickname,
+                user.description,
                 user.posts,
-                user!!.follows,
+                user.follows,
                 followers?.toList()
             )
 
             db.collection("users")
                 .document(getLoggedUserUid())
                 .set(myUpdatedUser).addOnSuccessListener {
-                    Log.i("User", "Actualizado correctamente")
+                    i("User", "Actualizado correctamente")
                 }.addOnSuccessListener {
                     Log.e("User", "No se pudo actualizar")
                 }
@@ -449,7 +432,7 @@ class DBM {
             db.collection("users")
                 .document(uid)
                 .set(updatedUser).addOnSuccessListener {
-                    Log.i("User", "Actualizado correctamente")
+                    i("User", "Actualizado correctamente")
                 }.addOnFailureListener {
                     Log.e("User", "No se pudo actualizar")
                 }
@@ -457,7 +440,7 @@ class DBM {
         }
 
         suspend fun isFollowing(userUid: String, uid: String): Boolean {
-            Log.i("Following", "User: $userUid")
+            i("Following", "User: $userUid")
             val user = getUserData(userUid).first()
             return user.follows?.any { it == uid } ?: false
         }
@@ -470,6 +453,113 @@ class DBM {
             }
         }
 
+
+
+        suspend fun likePost(postDate: String, userUid: String) {
+            val db = FirebaseFirestore.getInstance()
+            val user = getUserData(userUid).first()
+
+            val updatedPostList = user.posts!!.toMutableSet()
+
+
+            val postToUpdate = updatedPostList.find { post ->
+
+                post.date == postDate
+            }
+
+            if (postToUpdate != null) {
+                updatedPostList.remove(postToUpdate)
+                val likes = postToUpdate.likes?.toMutableList()
+                likes?.add(getLoggedUserUid())
+                postToUpdate.likes = likes
+                updatedPostList.add(postToUpdate)
+            }
+
+            Log.i("Like", "Post: $postToUpdate")
+
+            val updatedUser = User(
+                user.name,
+                user.nickname,
+                user.description,
+                updatedPostList.toList(),
+                user.follows,
+                user.followers
+            )
+
+            db.collection("users")
+                .document(userUid)
+                .set(updatedUser).addOnSuccessListener {
+                    i("Like", "Like correctamente")
+                }.addOnFailureListener {
+                    Log.e("Like", "No se pudo actualizar")
+                }
+
+        }
+
+
+        suspend fun dislikePost(postDate: String, userUid: String) {
+            val db = FirebaseFirestore.getInstance()
+            val user = getUserData(userUid).first()
+
+            val updatedPostList = user.posts!!.toMutableSet()
+
+            val postToUpdate = updatedPostList.find { post ->
+                post.date == postDate
+            }
+
+            if (postToUpdate != null) {
+                updatedPostList.remove(postToUpdate)
+                val likes = postToUpdate.likes?.toMutableList()
+                likes?.remove(getLoggedUserUid())
+                postToUpdate.likes = likes
+                updatedPostList.add(postToUpdate)
+            }
+
+            val updatedUser = User(
+                user.name,
+                user.nickname,
+                user.description,
+                updatedPostList.toList(),
+                user.follows,
+                user.followers
+            )
+
+            db.collection("users")
+                .document(userUid)
+                .set(updatedUser).addOnSuccessListener {
+                    i("Like", "Dislike correctamente")
+                }.addOnFailureListener {
+                    Log.e("Like", "No se pudo actualizar")
+                }
+
+        }
+
+        suspend fun deletePost(postDate: String){
+            val db = FirebaseFirestore.getInstance()
+            val user = getUserData(getLoggedUserUid()).first()
+
+            val updatedPostList = user.posts!!.toMutableSet()
+            updatedPostList.removeIf { it.date == postDate }
+
+            val updatedUser = User(
+                user.name,
+                user.nickname,
+                user.description,
+                updatedPostList.toList(),
+                user.follows,
+                user.followers
+            )
+
+            db.collection("users")
+                .document(getLoggedUserUid())
+                .set(updatedUser).addOnSuccessListener {
+                    i("Delete", "Borrado correctamente")
+                }.addOnFailureListener {
+                    Log.e("Delete", "No se pudo borrar")
+                }
+        }
+
+
         /*
         suspend fun getUserUid(user: User): String? {
             val firestore = FirebaseFirestore.getInstance()
@@ -480,8 +570,45 @@ class DBM {
 
             Log.i("GetUser", user.nickname + ": $uid")
             return uid
-        }*/
+        }
 
+        fun getPostById(id: String) {
+            val firestore = FirebaseFirestore.getInstance()
+            val collection = firestore.collection("users")
+            val query = collection.whereArrayContains("posts", id)
+        }
+
+
+
+        fun getUserByPostId(id: String): Flow<User?> = flow {
+            getAllUsers().collect {
+                emit( it.values.find { user -> user.posts!!.any { post -> post.date == id } })
+            }
+        }
+        fun getPostByUrl(url: String): Flow<Post?> = flow {
+
+            getAllUsers().collect {
+                emit( it.values.find { user -> user.posts!!.any { post -> post.download_link == url } }
+                    ?.posts!!.find { post -> post.download_link == url })
+            }
+        }
+        fun getRandomUserData(): Flow<User> = flow {
+            val db = FirebaseFirestore.getInstance()
+            var user = User()
+
+
+            db.collection("users").get().addOnSuccessListener {
+                Log.i("User", "Obtenido información")
+                val randomIndex = (0 until it.documents.size).random()
+                val data: User? = it.documents[randomIndex].toObject(User::class.java)
+                if (data?.posts != null) user = data
+
+                Log.i("Buscar", "${data ?: "null"}")
+                trySend(user)
+            }
+            awaitClose { channel.close() }
+        }
+*/
 
     }
 }
