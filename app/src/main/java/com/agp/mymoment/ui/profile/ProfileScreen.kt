@@ -61,8 +61,6 @@ fun ProfileScreen(
         else -> viewModel.setThemeToAuto()
     }
 
-    if (viewModel.isPopLaunched && !viewModel.openImageView) viewModel.isPopLaunched = false
-
     var blur = 0.dp
     if (viewModel.openImageView) {
         BackPressHandler(onBackPressed = {
@@ -97,6 +95,8 @@ fun ProfileScreen(
         //endregion navBar
         {
 
+            val list = viewModel.userData.posts?.sortedBy { it.date }
+
             LazyVerticalGrid(
                 modifier = Modifier.fillMaxSize(),
                 columns = GridCells.Fixed(3),
@@ -106,7 +106,7 @@ fun ProfileScreen(
                     ProfileScreenBody(navController, userUID = userUID)
                 }
 
-                val list = viewModel.userData.posts?.sortedBy { it.date }
+
 
                 items(list?.size ?: 0) { item ->
                     Row(
@@ -126,21 +126,22 @@ fun ProfileScreen(
                             viewModel.item = item
                         }
 
-                        if (viewModel.openImageView && !viewModel.isPopLaunched) {
-                            viewModel.isPopLaunched = true
-                            ImageView(
-                                url = list!![viewModel.item].download_link ?: "",
-                                pfpUrl = viewModel.pfp,
-                                userUid = userUID,
-                                onDeleteRequest = {viewModel.getUserData(userUID)},
-                                onUserClick = {
-                                    navController.navigate("${Destinations.ProfileScreen.ruta}/${userUID}")
-                                    viewModel.resetImageView()
-                                }) {
-                                viewModel.resetImageView()
-                            }
-                        }
+
                     }
+                }
+            }
+
+            if (viewModel.openImageView) {
+                ImageView(
+                    url = list?.get(viewModel.item)?.download_link ?: "",
+                    pfpUrl = viewModel.pfp,
+                    userUid = userUID,
+                    onDeleteRequest = {viewModel.getUserData(userUID)},
+                    onUserClick = {
+                        navController.navigate("${Destinations.ProfileScreen.ruta}/${userUID}")
+                        viewModel.resetImageView()
+                    }) {
+                    viewModel.resetImageView()
                 }
             }
 

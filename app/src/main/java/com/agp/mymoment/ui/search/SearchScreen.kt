@@ -21,6 +21,7 @@ import com.agp.mymoment.model.classes.User
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.composables.*
 import com.agp.mymoment.ui.image.ImageView
+import com.agp.mymoment.ui.profile.ProfileScreen
 
 @Composable
 fun SearchScreen(
@@ -30,9 +31,6 @@ fun SearchScreen(
     LaunchedEffect(key1 = true){
         viewModel.updateScreen()
     }
-
-    if (viewModel.isPopLaunched && !viewModel.openImageView) viewModel.isPopLaunched = false
-
     var blur = 0.dp
     if (viewModel.openImageView) {
         BackPressHandler(onBackPressed = {
@@ -40,6 +38,7 @@ fun SearchScreen(
         })
         blur = 10.dp
     }
+
     Column(
         Modifier
             .fillMaxSize()
@@ -51,7 +50,6 @@ fun SearchScreen(
                     .fillMaxWidth()
                     .fillMaxHeight(0.9f)
             ) {
-
                 ThemedTextField(
                     value = viewModel.searchText,
                     onValueChange = { viewModel.searchText = it },
@@ -62,7 +60,6 @@ fun SearchScreen(
 
             }
         }) {
-
 
             if (viewModel.searchText.isNotBlank()) {
                 SearchScreenBody(navController)
@@ -171,25 +168,33 @@ fun ExploreScreenBody(
                         viewModel.item = item
                     }
 
-                    if (viewModel.openImageView && !viewModel.isPopLaunched) {
-                        viewModel.isPopLaunched = true
-                        Log.i("Popup", "User: ${viewModel.posts[viewModel.item]}")
-                        ImageView(
-                            url = viewModel.posts[viewModel.item].download_link ?: "",
-                            pfpUrl = pfp,
-                            userUid = user.keys.first(),
-                            onDeleteRequest = {viewModel.updateScreen()},
-                            onUserClick = {
-                                navController!!.navigate("${Destinations.ProfileScreen.ruta}/${user.keys.first()}")
-                                viewModel.resetImageView()
-                            }
-                        ) {
-                            viewModel.resetImageView()
-                        }
 
-                    }
                 }
             }
         }
     }
+    val user =
+        viewModel.users.filter { it.value.posts!!.contains(viewModel.posts[viewModel.item]) }
+    if (user.isNotEmpty()) {
+        val pfp by viewModel.getPfp(user.keys.first()).collectAsState(initial = "")
+
+        if (viewModel.openImageView) {
+            Log.i("Popup", "User: ${viewModel.posts[viewModel.item]}")
+            ImageView(
+                url = viewModel.posts[viewModel.item].download_link ?: "",
+                pfpUrl = pfp,
+                userUid = user.keys.first(),
+                onDeleteRequest = {viewModel.updateScreen()},
+                onUserClick = {
+                    navController!!.navigate("${Destinations.ProfileScreen.ruta}/${user.keys.first()}")
+                    viewModel.resetImageView()
+                }
+            ) {
+                viewModel.resetImageView()
+            }
+
+
+        }
+    }
+
 }

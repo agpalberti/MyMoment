@@ -15,6 +15,8 @@ import com.agp.mymoment.config.MyResources
 import com.agp.mymoment.model.DBM
 import com.agp.mymoment.model.classes.User
 import com.agp.mymoment.model.utilities.bitmapToPNG
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.PagerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,7 +25,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    var isPopLaunched: Boolean = false
     var item: Int = 0
     var openImageView: Boolean by savedStateHandle.saveable { mutableStateOf(false) }
     var pfp by savedStateHandle.saveable { mutableStateOf("") }
@@ -33,15 +34,7 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
     var theme by savedStateHandle.saveable { mutableStateOf(MyResources.resources!!.getString(R.string.auto_theme)) }
     var userData by savedStateHandle.saveable { mutableStateOf(User()) }
     var onEditMode by savedStateHandle.saveable { mutableStateOf(false) }
-    var bitmap by savedStateHandle.saveable {
-        mutableStateOf<Bitmap>(
-            Bitmap.createBitmap(
-                200,
-                200,
-                Bitmap.Config.ARGB_8888
-            )
-        )
-    }
+
     var editingName by savedStateHandle.saveable { mutableStateOf("") }
     var editingBio by savedStateHandle.saveable { mutableStateOf("") }
     var isUserFollowing by savedStateHandle.saveable {
@@ -51,7 +44,6 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
 
     fun resetImageView(){
             openImageView = false
-            isPopLaunched = false
     }
 
     fun turnSidebarMenu() {

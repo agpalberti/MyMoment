@@ -1,13 +1,9 @@
 package com.agp.mymoment.ui.profile.followers
 
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.TabRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
-import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,6 +15,8 @@ import com.agp.mymoment.ui.composables.ThemedNavBar
 import com.agp.mymoment.ui.composables.UserListView
 import com.agp.mymoment.ui.profile.ProfileScreenViewModel
 import com.agp.mymoment.ui.search.SearchScreenViewModel
+import com.google.accompanist.pager.*
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -39,16 +37,14 @@ fun FollowersScreen(
                 color = MaterialTheme.colors.primary
             )
         }
-
     }) {
-
         FollowersScreenBody(navController, index)
-
     }
 
 }
 
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun FollowersScreenBody(
     navController: NavController,
@@ -92,54 +88,71 @@ fun FollowersScreenBody(
 
 
     val tabs = listOf("Seguidores", "Seguidos")
-    var selectedTabIndex by remember { mutableStateOf(index) }
-    val currentList =
-        if (selectedTabIndex == 0) profileScreenViewModel.userData.followers else profileScreenViewModel.userData.follows
+    var currentList: List<String>?
+    val pagerState = rememberPagerState(index)
+
+    val coroutineScope = rememberCoroutineScope()
 
     Column(Modifier.fillMaxSize()) {
 
         TabRow(
             modifier = Modifier
                 .fillMaxWidth(),
-            selectedTabIndex = selectedTabIndex,
+            selectedTabIndex = pagerState.currentPage,
             backgroundColor = MaterialTheme.colors.background,
             indicator = { tabPositions ->
                 TabRowDefaults.Indicator(
                     color = MaterialTheme.colors.primary,
                     height = 2.dp,
-                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex])
+                    modifier = Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
                 )
             }
         ) {
-            tabs.forEachIndexed { index, title ->
+            tabs.forEachIndexed { tabIndex, title ->
                 Tab(
                     text = { Text(title) },
-                    selected = index == selectedTabIndex,
-                    onClick = { selectedTabIndex = index }
+                    selected = pagerState.currentPage == tabIndex,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(tabIndex)
+                        }
+                    }
                 )
             }
         }
 
-        when (selectedTabIndex) {
-            0 -> {
+        HorizontalPager(count = tabs.size, state = pagerState) { page ->
 
-                LazyColumn(Modifier.fillMaxSize()) {
-                    items(currentList?.size ?: 0) { item ->
-                        TabRowsContent(currentList = currentList, item = item)
+            currentList =
+                if (page == 0) profileScreenViewModel.userData.followers else profileScreenViewModel.userData.follows
+
+            when (page) {
+                0 -> {
+
+
+                    LazyColumn(Modifier.fillMaxSize()) {
+                        items(currentList?.size ?: 0) { item ->
+                            if (currentList?.isNotEmpty() == true)
+                                TabRowsContent(currentList = currentList, item = item)
+                        }
                     }
                 }
-            }
-            1 -> {
-                LazyColumn(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(vertical = 1.dp)
-                ) {
-                    items(currentList?.size ?: 0) { item ->
-                        TabRowsContent(currentList = currentList, item = item)
+                1 -> {
+                    LazyColumn(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(vertical = 1.dp)
+                    ) {
+                        items(currentList?.size ?: 0) { item ->
+                            if (currentList?.isNotEmpty() == true) TabRowsContent(
+                                currentList = currentList,
+                                item = item
+                            )
+                        }
                     }
                 }
             }
         }
+
     }
 }

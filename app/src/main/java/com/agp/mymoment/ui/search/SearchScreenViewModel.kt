@@ -24,17 +24,15 @@ import javax.inject.Inject
 class SearchScreenViewModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel(){
 
 
+    var profilePreviewUid: String by savedStateHandle.saveable { mutableStateOf("") }
     var item: Int = 0
     var openImageView: Boolean by savedStateHandle.saveable{ mutableStateOf(false) }
     var searchText: String by savedStateHandle.saveable { mutableStateOf("") }
     var posts:List<Post> by savedStateHandle.saveable { mutableStateOf(mutableListOf()) }
     var users:Map<String,User> by savedStateHandle.saveable { mutableStateOf(mutableMapOf()) }
-    var isPopLaunched = false
-
 
     fun resetImageView(){
             openImageView = false
-            isPopLaunched = false
     }
 
     fun updateScreen(){
