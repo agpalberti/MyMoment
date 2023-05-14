@@ -5,6 +5,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -284,7 +285,10 @@ fun ProfileScreenBody(
         pfpImageUri = uri
     }
 
+    var seguidos = viewModel.userData.follows?.size?: 0
+    var seguidores =viewModel.userData.followers?.size?: 0
 
+    Log.i("wawa", viewModel.userData.follows?.size.toString())
 
     Column(
         Modifier
@@ -442,7 +446,7 @@ fun ProfileScreenBody(
                     ) {
 
                         Text(
-                            text = "${viewModel.userData.followers?.size?: ""}",
+                            text = "$seguidores",
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.primary
                         )
@@ -467,7 +471,7 @@ fun ProfileScreenBody(
                         Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "${viewModel.userData.follows?.size?: ""}",
+                            text = "$seguidos",
                             style = MaterialTheme.typography.body1,
                             color = MaterialTheme.colors.primary
                         )
@@ -530,12 +534,14 @@ fun ProfileScreenBody(
                             if (!viewModel.isUserFollowing) {
                                 OutlinedButton(onClick = {
                                     viewModel.follow(userUID)
+                                    seguidores++
                                 }) {
                                     Text(text = stringResource(id = R.string.follow))
                                 }
                             } else {
                                 OutlinedButton(onClick = {
                                     viewModel.unfollow(userUID)
+                                    seguidores--
                                 }) {
                                     Text(text = stringResource(id = R.string.unfollow))
                                 }

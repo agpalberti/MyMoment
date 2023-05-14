@@ -47,7 +47,7 @@ fun NavigationHost(navController: NavHostController, startDestination: String) {
             arguments = listOf(navArgument("uid") { type = NavType.StringType }, navArgument("index") { type = NavType.IntType })
         ) { backStackEntry ->
             val userUID = backStackEntry.arguments?.getString("uid")
-            val index = backStackEntry.arguments?.getInt("index")
+            backStackEntry.arguments?.getInt("index")
                 ?.let { userUID?.let { it1 -> FollowersScreen(navController, userUID = it1, index =it ) } }
         }
 

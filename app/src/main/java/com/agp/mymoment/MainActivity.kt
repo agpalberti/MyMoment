@@ -43,8 +43,8 @@ class MainActivity : ComponentActivity() {
             }
             MyMomentTheme(darkTheme ?: isSystemInDarkTheme()) { Start() }
         }
-        }
     }
+}
 
 
 @Composable

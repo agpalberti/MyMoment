@@ -34,7 +34,6 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
     var theme by savedStateHandle.saveable { mutableStateOf(MyResources.resources!!.getString(R.string.auto_theme)) }
     var userData by savedStateHandle.saveable { mutableStateOf(User()) }
     var onEditMode by savedStateHandle.saveable { mutableStateOf(false) }
-
     var editingName by savedStateHandle.saveable { mutableStateOf("") }
     var editingBio by savedStateHandle.saveable { mutableStateOf("") }
     var isUserFollowing by savedStateHandle.saveable {

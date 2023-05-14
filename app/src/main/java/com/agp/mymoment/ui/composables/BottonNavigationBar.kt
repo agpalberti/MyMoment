@@ -19,11 +19,10 @@ fun BottomNavigationBar(navController: NavController) {
         Destinations.HomeScreen,
         Destinations.SearchScreen,
         Destinations.UploadScreen,
-        Destinations.NotificationScreen,
+        //Destinations.NotificationScreen,
         Destinations.ProfileScreen
     )
 
-    //todo arreglar que se pueda volver al inicio de una pantalla en la que ya estas
     BottomAppBar(backgroundColor = MaterialTheme.colors.background, elevation = 0.dp) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
@@ -53,7 +52,7 @@ fun BottomNavigationBar(navController: NavController) {
 
                         navController.graph.startDestinationRoute?.let { screen_route ->
                             popUpTo(screen_route) {
-                                saveState = true
+                                saveState = false
                             }
                         }
                         launchSingleTop = true

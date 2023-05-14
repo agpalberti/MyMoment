@@ -1,8 +1,10 @@
 package com.agp.mymoment.model
 
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.util.Log.i
+import androidx.annotation.RequiresApi
 import com.agp.mymoment.config.MyResources
 import com.agp.mymoment.model.classes.Post
 import com.agp.mymoment.model.classes.User
@@ -19,6 +21,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import java.io.File
 import java.text.SimpleDateFormat
+import java.time.Clock
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class DBM {
@@ -167,11 +173,11 @@ class DBM {
             FirebaseAuth.getInstance().signOut()
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         fun uploadImage(image: File): Task<Pair<Uri, String>> {
             val db = Firebase.storage.reference.child("users")
-            val date = Date()
-            val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-            val ref = db.child("${Firebase.auth.uid}/posts/${dateFormat.format(date)}.png")
+            val date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+            val ref = db.child("${Firebase.auth.uid}/posts/${date}.png")
             return ref.putBytes(image.readBytes()).continueWithTask { task ->
                 if (!task.isSuccessful) {
                     Log.e("Camara", "Firebase: Error al subir nuevo post", task.exception)
@@ -183,10 +189,11 @@ class DBM {
                 if (!task.isSuccessful) {
                     task.exception?.let { throw it }
                 }
-                Pair(task.result!!, dateFormat.format(date))
+                Pair(task.result!!, date)
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         suspend fun uploadNewPost(image: File) {
             if (Firebase.auth.currentUser != null) {
                 var user: User?
@@ -280,7 +287,7 @@ class DBM {
                     }
                     .addOnFailureListener { e ->
                         Log.w("User", "No hay banner", e)
-                        c.resume("https://sftool.gov/Content/Images/GPC/gpc-jumbotron-bg.jpg")
+                        c.resume("https://w7.pngwing.com/pngs/869/370/png-transparent-low-polygon-background-green-banner-low-poly-materialized-flat.png")
                     }
 
             } else Log.e("User", "Error en la sesión")

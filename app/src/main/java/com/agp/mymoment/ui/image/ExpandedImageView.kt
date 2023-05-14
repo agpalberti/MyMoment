@@ -13,7 +13,4 @@ fun ImageView(
     onDeleteRequest: () -> Unit
 ) {
 
-
-
-
 }

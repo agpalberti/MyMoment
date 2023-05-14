@@ -1,6 +1,6 @@
 package com.agp.mymoment.ui.profile.followers
 
-import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
@@ -27,7 +27,12 @@ fun FollowersScreen(
     viewModel: ProfileScreenViewModel = hiltViewModel()
 ) {
 
-    viewModel.getUserData(userUID)
+    //todo arreglar que la lista desaparece por la cara
+
+    LaunchedEffect(Unit) {
+        viewModel.getUserData(userUID)
+    }
+
     ThemedNavBar(navController = navController, topBarContent = {
 
         Row(Modifier.fillMaxWidth(0.5f), Arrangement.Start) {
@@ -52,7 +57,6 @@ fun FollowersScreenBody(
     profileScreenViewModel: ProfileScreenViewModel = hiltViewModel(),
     searchScreenViewModel: SearchScreenViewModel = hiltViewModel()
 ) {
-    //todo implementar swipe
     @Composable
     fun TabRowsContent(currentList: List<String>?, item: Int) {
         Row(
@@ -86,9 +90,7 @@ fun FollowersScreenBody(
         }
     }
 
-
     val tabs = listOf("Seguidores", "Seguidos")
-    var currentList: List<String>?
     val pagerState = rememberPagerState(index)
 
     val coroutineScope = rememberCoroutineScope()
@@ -123,14 +125,13 @@ fun FollowersScreenBody(
 
         HorizontalPager(count = tabs.size, state = pagerState) { page ->
 
-            currentList =
-                if (page == 0) profileScreenViewModel.userData.followers else profileScreenViewModel.userData.follows
-
             when (page) {
                 0 -> {
 
 
                     LazyColumn(Modifier.fillMaxSize()) {
+
+                        val currentList  = profileScreenViewModel.userData.followers
                         items(currentList?.size ?: 0) { item ->
                             if (currentList?.isNotEmpty() == true)
                                 TabRowsContent(currentList = currentList, item = item)
@@ -143,6 +144,7 @@ fun FollowersScreenBody(
                             .fillMaxSize()
                             .padding(vertical = 1.dp)
                     ) {
+                        val currentList  = profileScreenViewModel.userData.follows
                         items(currentList?.size ?: 0) { item ->
                             if (currentList?.isNotEmpty() == true) TabRowsContent(
                                 currentList = currentList,
@@ -153,6 +155,5 @@ fun FollowersScreenBody(
                 }
             }
         }
-
     }
 }
