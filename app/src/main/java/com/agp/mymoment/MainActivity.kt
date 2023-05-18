@@ -1,5 +1,7 @@
 package com.agp.mymoment
 
+import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -27,6 +29,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @SuppressLint("SourceLockedOrientationActivity")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +39,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             val myPreferences = MyPreferences(context)
+
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             val theme = myPreferences.accessTheme.collectAsState(initial = null)
 
             val darkTheme = when (theme.value) {

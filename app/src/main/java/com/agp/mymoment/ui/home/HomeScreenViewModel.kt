@@ -27,6 +27,4 @@ class HomeScreenViewModel @Inject constructor(savedStateHandle: SavedStateHandle
             emit(it)
         }
     }
-
-
 }
