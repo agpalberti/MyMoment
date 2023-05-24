@@ -51,4 +51,5 @@
     <string name="search">Buscar</string>
     <string name="passwordConfirmationError">Las contraseñas no coinciden</string>
     <string name="confirmPassword">Confirmar contraseña</string>
+    <string name="no_stories">No hay historias, intenta seguir a alguien nuevo :)</string>
 </resources>

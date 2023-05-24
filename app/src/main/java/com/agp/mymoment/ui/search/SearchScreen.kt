@@ -1,6 +1,8 @@
 package com.agp.mymoment.ui.search
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -23,6 +25,7 @@ import com.agp.mymoment.ui.composables.*
 import com.agp.mymoment.ui.image.ImageView
 import com.agp.mymoment.ui.profile.ProfileScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SearchScreen(
     navController: NavHostController,
@@ -125,6 +128,7 @@ fun SearchScreenBody(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 @Preview
 fun ExploreScreenBody(

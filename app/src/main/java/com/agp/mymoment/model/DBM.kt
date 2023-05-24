@@ -280,7 +280,6 @@ class DBM {
         suspend fun getBanner(uid: String): String = suspendCoroutine { c ->
             val banner = Firebase.storage.reference.child("users/${uid}/banner.png")
             if (Firebase.auth.uid != null) {
-
                 banner.downloadUrl
                     .addOnSuccessListener { url ->
                         c.resume(url.toString())

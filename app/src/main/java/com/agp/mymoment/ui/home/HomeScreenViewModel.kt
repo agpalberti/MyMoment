@@ -19,6 +19,9 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel(){
 
+
+    var date:String by savedStateHandle.saveable{ mutableStateOf("")}
+
     suspend fun getPFP(uid: String): String {
         return DBM.getPFP(uid)
     }
