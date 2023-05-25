@@ -22,6 +22,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +46,7 @@ import com.agp.mymoment.navigation.Destinations
 fun StoryView(
     user: User,
     stories: MutableList<Post>?,
-    uid:String,
+    uid: String,
     pfp: String,
     navController: NavHostController?
 ) {
@@ -69,63 +70,87 @@ fun StoryView(
         }
     }
 
-    Log.i("Story" , "index: $index")
-Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Log.i("Story", "index: $index")
+    Column(Modifier.fillMaxWidth()) {
 
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
 
-    Row(Modifier.clickable(
-        indication = null,
-        interactionSource = interactionSource
-    ) {
-        navController!!.navigate(
-            "${Destinations.ProfileScreen.ruta}/$uid"
-        )
-    }, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                Modifier.clickable(
+                    indication = null,
+                    interactionSource = interactionSource
+                ) {
+                    navController!!.navigate(
+                        "${Destinations.ProfileScreen.ruta}/$uid"
+                    )
+                }, verticalAlignment = Alignment.CenterVertically
+            ) {
 
-        Box(
-            modifier = Modifier
-                .padding(start = 10.dp)
-                .size(35.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colors.background),
-        ) {
-            AsyncImage(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop,
-                model = pfp,
-                contentDescription = "Image"
-            )
-        }
+                Box(
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .size(35.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colors.background),
+                ) {
+                    AsyncImage(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                        model = pfp,
+                        contentDescription = "Image"
+                    )
+                }
 
-        Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
-        Text(text = user!!.nickname ?: "")
-    }
-
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(end = 20.dp), horizontalArrangement = Arrangement.End
-    , verticalAlignment = Alignment.CenterVertically
-    ) {
-
-
-        if (stories != null) {
-            (if (stories[index].date?.isEmpty() == true) "" else stories[index].date?.let {
-                DeviceConfig.translateDate(
-                    it
-                )
-            })?.let {
-                Text(
-                    text = it, fontSize = 10.sp
-                )
+                Text(text = user.nickname ?: "")
             }
+
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(end = 20.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+
+                if (stories != null) {
+                    (if (stories[index].date?.isEmpty() == true) "" else stories[index].date?.let {
+                        DeviceConfig.translateDate(
+                            it
+                        )
+                    })?.let {
+                        Text(
+                            text = it, fontSize = 10.sp
+                        )
+                    }
+                }
+            }
+
         }
+
+        /*
+
+        Row(Modifier.fillMaxWidth()) {
+
+            var indicatorProgress by remember { mutableStateOf(0f) }
+
+            LaunchedEffect(index){
+                indicatorProgress = 0f
+                indicatorProgress = 1f
+            }
+            MyIndicator(indicatorProgress = indicatorProgress)
+
+        }*/
     }
-}
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center ) {
+    Column(
+        Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
 
         Box(Modifier.fillMaxHeight(0.89f)) {
             AsyncImage(
@@ -139,13 +164,17 @@ Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Row(
                 Modifier
                     .fillMaxSize()
-                    .alpha(0f)) {
-                Button(onClick = { previous() }, modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.5f)) {  }
+                    .alpha(0f)
+            ) {
+                Button(
+                    onClick = { previous() }, modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.5f)
+                ) { }
                 Button(onClick = { next() }, modifier = Modifier.fillMaxSize()) { }
             }
         }
     }
 
 }
+

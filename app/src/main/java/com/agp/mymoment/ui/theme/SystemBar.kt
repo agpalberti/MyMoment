@@ -1,7 +1,6 @@
 package com.agp.mymoment.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
@@ -9,7 +8,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.agp.mymoment.config.MyPreferences
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.firebase.annotations.concurrent.Background
 
 @Composable
 fun SystemBarColor(backgroundColor: Color) {

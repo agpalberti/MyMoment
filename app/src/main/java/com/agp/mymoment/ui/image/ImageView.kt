@@ -1,7 +1,6 @@
 package com.agp.mymoment.ui.image
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -144,6 +143,7 @@ fun ImageView(
                             }
 
 
+                        //region Comentado
                         /*
                         IconButton(onClick = { /*TODO*/ }) {
                             Icon(
@@ -161,6 +161,8 @@ fun ImageView(
                             )
                         }
                         */
+                        //endregion
+
                         IconButton(onClick = { viewModel.enableOptions = true }) {
                             Icon(
                                 modifier = Modifier.size(30.dp),
@@ -175,6 +177,7 @@ fun ImageView(
 
                 }
 
+                //fixme: no deja hacer click en el menu
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                     DropdownMenu(
                         expanded = viewModel.enableOptions,

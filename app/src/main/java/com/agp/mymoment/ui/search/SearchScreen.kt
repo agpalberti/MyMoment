@@ -23,7 +23,6 @@ import com.agp.mymoment.model.classes.User
 import com.agp.mymoment.navigation.Destinations
 import com.agp.mymoment.ui.composables.*
 import com.agp.mymoment.ui.image.ImageView
-import com.agp.mymoment.ui.profile.ProfileScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
