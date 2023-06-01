@@ -15,8 +15,6 @@ import com.agp.mymoment.config.MyResources
 import com.agp.mymoment.model.DBM
 import com.agp.mymoment.model.classes.User
 import com.agp.mymoment.model.utilities.bitmapToPNG
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -45,7 +43,7 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
             openImageView = false
     }
 
-    fun turnSidebarMenu() {
+    fun turnDrawerMenu() {
         enableSettingsMenu = !enableSettingsMenu
     }
 
@@ -134,7 +132,7 @@ class ProfileScreenViewModel @Inject constructor(savedStateHandle: SavedStateHan
         editingBio = userData.description ?: ""
     }
 
-    fun getCurrentUserUid() = DBM.getLoggedUserUid()
+    fun getLoggedUserUid() = DBM.getLoggedUserUid()
 
     private suspend fun updateImages(uid: String) {
         this.pfp = DBM.getPFP(uid)

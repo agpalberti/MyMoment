@@ -26,7 +26,6 @@ fun FollowersScreen(
     viewModel: ProfileScreenViewModel = hiltViewModel()
 ) {
 
-    //todo arreglar que la lista desaparece por la cara
 
     LaunchedEffect(Unit) {
         viewModel.getUserData(userUID)

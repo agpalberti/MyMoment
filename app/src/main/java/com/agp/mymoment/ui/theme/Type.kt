@@ -8,12 +8,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.agp.mymoment.R
 
+val Courgette = FontFamily( Font(R.font.courgette) )
+
 val Sans = FontFamily(
     Font(R.font.sans_bold), Font(R.font.sans_bolditalic), Font(R.font.sans_italic),
     Font(R.font.sans_medium), Font(R.font.sans_mediumitalic), Font(R.font.sans_regular)
 )
-
-val Courgette = FontFamily( Font(R.font.courgette) )
 
 // Set of Material typography styles to start with
 val Typography = Typography(

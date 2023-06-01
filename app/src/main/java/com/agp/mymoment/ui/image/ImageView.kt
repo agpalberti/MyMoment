@@ -177,7 +177,7 @@ fun ImageView(
 
                 }
 
-                //fixme: no deja hacer click en el menu
+                //fixme: arreglar posicion menu
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                     DropdownMenu(
                         expanded = viewModel.enableOptions,

@@ -3,7 +3,9 @@ package com.agp.mymoment.ui.upload
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -23,6 +25,7 @@ class UploadScreenViewModel @Inject constructor(savedStateHandle: SavedStateHand
     var imageUri by savedStateHandle.saveable { mutableStateOf(emptyImageUri) }
     var showGallerySelect by savedStateHandle.saveable { mutableStateOf(false) }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun uploadNewPost(bitmap: Bitmap, context: Context){
         val post = bitmapToPNG(bitmap, context)
         if (post != null) {

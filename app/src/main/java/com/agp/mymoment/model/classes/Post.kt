@@ -14,8 +14,7 @@ data class Post(
         parcel.readString(),
         parcel.createStringArrayList(),
         parcel.readString()
-    ) {
-    }
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(date)

@@ -83,14 +83,14 @@ fun ProfileScreen(
                 )
             }
             Row(Modifier.fillMaxWidth(), Arrangement.End) {
-                if (userUID == viewModel.getCurrentUserUid()) {
+                if (userUID == viewModel.getLoggedUserUid()) {
                     NoRippleIconButton(
                         painterResource(id = R.drawable.menu_open),
                         contentDescription = stringResource(id = R.string.open_menu),
                         modifier = Modifier.size(30.dp)
                     ) {
                         //onClick
-                        viewModel.turnSidebarMenu()
+                        viewModel.turnDrawerMenu()
                     }
                 }
             }
@@ -150,7 +150,7 @@ fun ProfileScreen(
 
         }
 
-        if (userUID == viewModel.getCurrentUserUid()) {
+        if (userUID == viewModel.getLoggedUserUid()) {
             //region Menu opciones
             AnimatedVisibility(
                 visible = viewModel.enableSettingsMenu, enter = slideInHorizontally(
@@ -165,10 +165,10 @@ fun ProfileScreen(
             ) {
                 //Si estoy en esta pantalla cuando le doy al botón de atrás no quiero cambiar de pantalla
                 //Si no que este menú se vuelva a plegar
-                BackPressHandler(viewModel::turnSidebarMenu)
+                BackPressHandler(viewModel::turnDrawerMenu)
                 ModalDrawer(
                     modifier = Modifier.background(MaterialTheme.colors.background),
-                    switchSettings = viewModel::turnSidebarMenu
+                    switchSettings = viewModel::turnDrawerMenu
                 ) {
 
                     Column(
@@ -528,7 +528,7 @@ fun ProfileScreenBody(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Column() {
                     if (!viewModel.onEditMode) {
-                        if (userUID == viewModel.getCurrentUserUid()) {
+                        if (userUID == viewModel.getLoggedUserUid()) {
                             OutlinedButton(onClick = { viewModel.switchEditMode() }) {
                                 Text(text = stringResource(id = R.string.edit_profile))
                             }
@@ -561,7 +561,7 @@ fun ProfileScreenBody(
                                     context
                                 )
                                 viewModel.uploadUserData()
-                                viewModel.getUserData(viewModel.getCurrentUserUid())
+                                viewModel.getUserData(viewModel.getLoggedUserUid())
                                 viewModel.switchEditMode()
                             }) {
                                 Text(text = stringResource(id = R.string.save_changes))
