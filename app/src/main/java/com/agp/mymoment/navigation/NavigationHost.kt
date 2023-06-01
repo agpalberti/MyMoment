@@ -8,8 +8,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.agp.mymoment.ui.login.RegisterScreen
 import com.agp.mymoment.ui.home.HomeScreen
+import com.agp.mymoment.ui.login.RegisterScreen
 import com.agp.mymoment.ui.notifications.NotificationScreen
 import com.agp.mymoment.ui.profile.ProfileScreen
 import com.agp.mymoment.ui.profile.followers.FollowersScreen

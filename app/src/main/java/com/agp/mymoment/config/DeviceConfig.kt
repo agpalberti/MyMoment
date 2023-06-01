@@ -2,7 +2,6 @@ package com.agp.mymoment.config
 
 import android.os.Build
 import android.util.DisplayMetrics
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
@@ -10,7 +9,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.agp.mymoment.config.DeviceConfig.Companion.setDpValues
-import com.agp.mymoment.model.classes.Post
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
